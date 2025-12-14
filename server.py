@@ -4,7 +4,8 @@ import google.generativeai as genai
 import os
 from datetime import datetime
 
-app = Flask(__name__)
+# Initialize Flask with static folder configuration to serve files from root
+app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
 
 # Configure Gemini API
@@ -239,17 +240,8 @@ def get_contact():
 
 @app.route('/')
 def home():
-    """Root endpoint"""
-    return jsonify({
-        'message': 'Welcome to Mozart\'s Restaurant API',
-        'endpoints': {
-            'chat': '/api/chat (POST)',
-            'menu': '/api/menu (GET)',
-            'events': '/api/events (GET)',
-            'contact': '/api/contact (GET)',
-            'health': '/api/health (GET)'
-        }
-    })
+    """Root endpoint to serve the website"""
+    return app.send_static_file('index.html')
 
 if __name__ == '__main__':
     # Check if API key is set
