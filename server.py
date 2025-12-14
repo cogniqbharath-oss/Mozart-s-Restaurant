@@ -3,6 +3,8 @@ from flask_cors import CORS
 import google.generativeai as genai
 import os
 from datetime import datetime
+import json
+import urllib.request
 # Initialize Flask with static folder configuration to serve files from root
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
