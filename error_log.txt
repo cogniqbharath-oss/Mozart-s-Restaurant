@@ -1,0 +1,94 @@
+[2025-12-14T15:31:43.066162] Error in chat endpoint: 400 Bad Request: Failed to decode JSON object: Invalid \escape: line 1 column 12 (char 11)
+Traceback (most recent call last):
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\wrappers\request.py", line 611, in get_json
+    rv = self.json_module.loads(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\flask\json\provider.py", line 188, in loads
+    return json.loads(s, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\json\decoder.py", line 354, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Invalid \escape: line 1 column 12 (char 11)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Mozart's Restaurant\server.py", line 95, in chat
+    data = request.get_json()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\wrappers\request.py", line 620, in get_json
+    rv = self.on_json_loading_failed(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\flask\wrappers.py", line 130, in on_json_loading_failed
+    return super().on_json_loading_failed(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\werkzeug\wrappers\request.py", line 645, in on_json_loading_failed
+    raise BadRequest(f"Failed to decode JSON object: {e}")
+werkzeug.exceptions.BadRequest: 400 Bad Request: Failed to decode JSON object: Invalid \escape: line 1 column 12 (char 11)
+
+[2025-12-14T15:37:27.006798] Error in chat endpoint: Timeout of 60.0s exceeded, last exception: 503 failed to connect to all addresses; last error: UNAVAILABLE: ipv4:172.217.27.170:443: IOCP/Socket: Connection reset (An existing connection was forcibly closed by the remote host.
+ -- 10054)
+Traceback (most recent call last):
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\grpc_helpers.py", line 75, in error_remapped_callable
+    return callable_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\grpc\_channel.py", line 1166, in __call__
+    return _end_unary_response_blocking(state, call, False, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\grpc\_channel.py", line 996, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNAVAILABLE
+	details = "failed to connect to all addresses; last error: UNAVAILABLE: ipv4:172.217.27.170:443: IOCP/Socket: Connection reset (An existing connection was forcibly closed by the remote host.
+ -- 10054)"
+	debug_error_string = "UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"failed to connect to all addresses; last error: UNAVAILABLE: ipv4:172.217.27.170:443: IOCP/Socket: Connection reset (An existing connection was forcibly closed by the remote host.\r\n -- 10054)"}"
+>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\retry\retry_unary.py", line 147, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\grpc_helpers.py", line 77, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.ServiceUnavailable: 503 failed to connect to all addresses; last error: UNAVAILABLE: ipv4:172.217.27.170:443: IOCP/Socket: Connection reset (An existing connection was forcibly closed by the remote host.
+ -- 10054)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "E:\Mozart's Restaurant\server.py", line 120, in chat
+    response = model.generate_content(prompt)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\generativeai\generative_models.py", line 248, in generate_content
+    response = self._client.generate_content(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 566, in generate_content
+    response = rpc(
+               ^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\retry\retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\retry\retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+                 ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\MY-PC\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\retry\retry_base.py", line 229, in _retry_error_helper
+    raise final_exc from source_exc
+google.api_core.exceptions.RetryError: Timeout of 60.0s exceeded, last exception: 503 failed to connect to all addresses; last error: UNAVAILABLE: ipv4:172.217.27.170:443: IOCP/Socket: Connection reset (An existing connection was forcibly closed by the remote host.
+ -- 10054)
+

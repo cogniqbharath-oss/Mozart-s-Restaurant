@@ -130,8 +130,11 @@ Provide a helpful, professional response that addresses their needs while mainta
     
     except Exception as e:
         import traceback
-        traceback.print_exc()
-        print(f"Error in chat endpoint: {str(e)}")
+        error_msg = f"Error in chat endpoint: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        with open("error_log.txt", "a") as f:
+            f.write(f"[{datetime.now().isoformat()}] {error_msg}\n")
+            
         return jsonify({
             'success': False,
             'error': 'Internal server error',
