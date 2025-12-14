@@ -5,7 +5,7 @@
     --color-primary-dark: hsl(340, 82%, 42%);
     --color-secondary: hsl(45, 100%, 51%);
     --color-accent: hsl(280, 70%, 60%);
-    
+
     /* Dark Theme */
     --color-bg-dark: hsl(230, 20%, 7%);
     --color-bg-darker: hsl(230, 25%, 5%);
@@ -13,28 +13,28 @@
     --color-text-primary: hsl(0, 0%, 98%);
     --color-text-secondary: hsl(0, 0%, 75%);
     --color-text-muted: hsl(0, 0%, 60%);
-    
+
     /* Glassmorphism */
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
     --spacing-md: 2rem;
     --spacing-lg: 4rem;
     --spacing-xl: 6rem;
-    
+
     /* Typography */
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Inter', sans-serif;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-medium: 0.3s ease;
     --transition-slow: 0.5s ease;
-    
+
     /* Border Radius */
     --radius-sm: 8px;
     --radius-md: 16px;
@@ -187,11 +187,10 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background: linear-gradient(135deg, 
-        hsla(340, 82%, 20%, 0.3) 0%, 
-        hsla(230, 20%, 10%, 0.9) 50%,
-        hsla(280, 70%, 20%, 0.3) 100%
-    );
+    background: linear-gradient(135deg,
+            hsla(340, 82%, 20%, 0.3) 0%,
+            hsla(230, 20%, 10%, 0.9) 50%,
+            hsla(280, 70%, 20%, 0.3) 100%);
 }
 
 .hero::before {
@@ -201,15 +200,22 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
+    background-image:
         radial-gradient(circle at 20% 50%, rgba(228, 36, 89, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
     animation: gradient-shift 15s ease infinite;
 }
 
 @keyframes gradient-shift {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .hero-overlay {
@@ -218,7 +224,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920') center/cover;
+    background: url('assets/bar.png') center/cover;
     opacity: 0.15;
     z-index: 0;
 }
@@ -237,6 +243,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -350,8 +357,17 @@ body {
 }
 
 @keyframes scroll-bounce {
-    0%, 100% { transform: translateY(0); opacity: 1; }
-    50% { transform: translateY(10px); opacity: 0.5; }
+
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(10px);
+        opacity: 0.5;
+    }
 }
 
 /* Section Styles */
@@ -529,13 +545,28 @@ section {
     box-shadow: 0 20px 40px rgba(228, 36, 89, 0.2);
 }
 
+.feature-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .menu-card-image {
     position: relative;
-    height: 200px;
+    height: 250px;
     background: linear-gradient(135deg, rgba(228, 36, 89, 0.1), rgba(168, 85, 247, 0.1));
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+}
+
+.menu-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-medium);
+}
+
+.menu-card:hover .menu-image {
+    transform: scale(1.1);
 }
 
 .menu-badge {
@@ -550,6 +581,24 @@ section {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.menu-price-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .menu-card-content {
@@ -565,16 +614,14 @@ section {
 .menu-card-content p {
     color: var(--color-text-secondary);
     font-size: 0.95rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
+    /* Remove bottom margin as price is moved */
     line-height: 1.6;
 }
 
 .menu-price {
-    display: block;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    font-family: var(--font-heading);
+    display: none;
+    /* Hide original price location */
 }
 
 .menu-note {
@@ -588,11 +635,10 @@ section {
 
 /* Events Section */
 .events {
-    background: linear-gradient(135deg, 
-        hsla(340, 82%, 20%, 0.1) 0%, 
-        var(--color-bg-dark) 50%,
-        hsla(280, 70%, 20%, 0.1) 100%
-    );
+    background: linear-gradient(135deg,
+            hsla(340, 82%, 20%, 0.1) 0%,
+            var(--color-bg-dark) 50%,
+            hsla(280, 70%, 20%, 0.1) 100%);
 }
 
 .events-content {
@@ -924,6 +970,7 @@ section {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1017,8 +1064,15 @@ section {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-avatar {
@@ -1131,8 +1185,18 @@ section {
 }
 
 @keyframes typing {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-    30% { transform: translateY(-10px); opacity: 1; }
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
 }
 
 /* Responsive Design */
@@ -1140,11 +1204,11 @@ section {
     .nav-menu {
         display: none;
     }
-    
+
     .nav-toggle {
         display: flex;
     }
-    
+
     .about-grid,
     .events-content,
     .wine-grid,
@@ -1153,12 +1217,12 @@ section {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
-    
+
     .about-features,
     .wine-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .chatbot-container {
         width: calc(100% - 2rem);
         height: calc(100vh - 4rem);
@@ -1166,11 +1230,11 @@ section {
         right: 1rem;
         bottom: 1rem;
     }
-    
+
     .hero-buttons {
         flex-direction: column;
     }
-    
+
     .menu-grid {
         grid-template-columns: 1fr;
     }
@@ -1180,15 +1244,15 @@ section {
     .hero-title-main {
         font-size: 2.5rem;
     }
-    
+
     .hero-title-sub {
         font-size: 1.5rem;
     }
-    
+
     .section-title {
         font-size: 2rem;
     }
-    
+
     .btn {
         padding: 0.875rem 1.5rem;
         font-size: 0.95rem;
