@@ -128,6 +128,8 @@ Provide a helpful, professional response that addresses their needs while mainta
         })
     
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"Error in chat endpoint: {str(e)}")
         return jsonify({
             'success': False,
