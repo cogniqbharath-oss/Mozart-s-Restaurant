@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mozart's Restaurant - Fine European Dining in Leavenworth, WA</title>
+    <meta name="description" content="Experience romantic, woman-owned fine dining featuring Modern European/Austrian and Pacific Northwest cuisine. Live music, extensive wine cellar, and seasonal specialties in the heart of Leavenworth.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>Mozart's</h1>
+                <span class="nav-subtitle">Fine European Dining</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#menu" class="nav-link">Menu</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#" class="nav-link btn-reserve" onclick="toggleChatbot()">Reserve Now</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-label">Woman-Owned Excellence Since 1980</span>
+            <h1 class="hero-title">
+                <span class="hero-title-main">Mozart's Restaurant</span>
+                <span class="hero-title-sub">Modern European Elegance</span>
+            </h1>
+            <p class="hero-description">
+                Experience the finest European & Pacific Northwest cuisine in Leavenworth's most romantic setting
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="toggleChatbot()">
+                    <span>Make a Reservation</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <a href="#menu" class="btn btn-secondary">View Menu</a>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span>Scroll to explore</span>
+            <div class="scroll-indicator"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <div class="image-card">
+                        <!-- Add your restaurant image here -->
+                        <div class="placeholder-image">
+                            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="about-badge">
+                        <span class="badge-number">40+</span>
+                        <span class="badge-text">Years of Excellence</span>
+                    </div>
+                </div>
+                <div class="about-content">
+                    <span class="section-label">Our Story</span>
+                    <h2 class="section-title">A Legacy of Culinary Excellence</h2>
+                    <p class="about-text">
+                        Nestled in the heart of Leavenworth, Mozart's Restaurant has been serving exceptional 
+                        European and Pacific Northwest cuisine for over four decades. Our woman-owned establishment 
+                        combines the rich traditions of Austrian cooking with innovative modern techniques.
+                    </p>
+                    <p class="about-text">
+                        Located upstairs at 829 Front Street, our intimate dining room offers breathtaking views 
+                        and a romantic atmosphere perfect for special occasions. From our extensive wine cellar 
+                        to our Friday night live music performances, every detail is crafted for an unforgettable experience.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🍷</div>
+                            <h3>Extensive Wine Cellar</h3>
+                            <p>Curated selection of premium wines</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🎵</div>
+                            <h3>Live Music Fridays</h3>
+                            <p>Elegant performances every Friday night</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🌱</div>
+                            <h3>Special Diets</h3>
+                            <p>Gluten-free & vegetarian options</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Highlights -->
+    <section class="menu-section" id="menu">
+        <div class="container">
+            <div class="menu-header">
+                <span class="section-label">Culinary Masterpieces</span>
+                <h2 class="section-title">Seasonal Specialties</h2>
+                <p class="section-description">
+                    Our chef-driven menu celebrates the finest seasonal ingredients, 
+                    blending European traditions with Pacific Northwest bounty.
+                </p>
+            </div>
+            <div class="menu-grid">
+                <div class="menu-card" data-category="signature">
+                    <div class="menu-card-image">
+                        <div class="placeholder-image">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <span class="menu-badge">Chef's Special</span>
+                    </div>
+                    <div class="menu-card-content">
+                        <h3>Oktoberfest Sampler</h3>
+                        <p>A celebration of Austrian flavors featuring bratwurst, schnitzel, sauerkraut, and spätzle</p>
+                        <span class="menu-price">Market Price</span>
+                    </div>
+                </div>
+                <div class="menu-card" data-category="seasonal">
+                    <div class="menu-card-image">
+                        <div class="placeholder-image">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <span class="menu-badge">Seasonal</span>
+                    </div>
+                    <div class="menu-card-content">
+                        <h3>Pacific Northwest Salmon</h3>
+                        <p>Wild-caught salmon with seasonal vegetables and citrus beurre blanc</p>
+                        <span class="menu-price">$42</span>
+                    </div>
+                </div>
+                <div class="menu-card" data-category="classic">
+                    <div class="menu-card-image">
+                        <div class="placeholder-image">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <span class="menu-badge">Classic</span>
+                    </div>
+                    <div class="menu-card-content">
+                        <h3>Wiener Schnitzel</h3>
+                        <p>Traditional Austrian veal cutlet with potato salad and lingonberry sauce</p>
+                        <span class="menu-price">$38</span>
+                    </div>
+                </div>
+                <div class="menu-card" data-category="vegetarian">
+                    <div class="menu-card-image">
+                        <div class="placeholder-image">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <circle cx="12" cy="8" r="7"/>
+                                <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/>
+                            </svg>
+                        </div>
+                        <span class="menu-badge">Vegetarian</span>
+                    </div>
+                    <div class="menu-card-content">
+                        <h3>Wild Mushroom Risotto</h3>
+                        <p>Creamy Arborio rice with seasonal mushrooms, truffle oil, and aged parmesan</p>
+                        <span class="menu-price">$32</span>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-note">
+                <p><strong>Price Range:</strong> $50-$100 per person | <strong>Dietary Options:</strong> We offer gluten-free and vegetarian alternatives</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events & Live Music -->
+    <section class="events" id="events">
+        <div class="container">
+            <div class="events-content">
+                <div class="events-info">
+                    <span class="section-label">Experience</span>
+                    <h2 class="section-title">Live Music & Special Events</h2>
+                    <p class="events-description">
+                        Elevate your dining experience with live music every Friday night. Our carefully curated 
+                        performances create the perfect ambiance for romantic evenings and special celebrations.
+                    </p>
+                    <div class="events-schedule">
+                        <div class="schedule-item">
+                            <div class="schedule-icon">🎻</div>
+                            <div class="schedule-details">
+                                <h4>Friday Night Live Music</h4>
+                                <p>Every Friday 7:00 PM - 10:00 PM</p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-icon">🎃</div>
+                            <div class="schedule-details">
+                                <h4>Oktoberfest Celebration</h4>
+                                <p>September - October | Special Menu Available</p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-icon">🍾</div>
+                            <div class="schedule-details">
+                                <h4>Wine Tasting Events</h4>
+                                <p>Monthly | Check with our AI Concierge for dates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="events-image">
+                    <div class="image-card glass-card">
+                        <div class="placeholder-image">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M9 18V5l12-2v13"/>
+                                <circle cx="6" cy="18" r="3"/>
+                                <circle cx="18" cy="16" r="3"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wine Cellar -->
+    <section class="wine-section">
+        <div class="container">
+            <div class="wine-grid">
+                <div class="wine-image">
+                    <div class="image-card">
+                        <div class="placeholder-image">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M8 2h8v6.17a3 3 0 0 1-.879 2.122L12 13.414l-3.121-3.121A3 3 0 0 1 8 8.171V2z"/>
+                                <path d="M12 14v8"/>
+                                <path d="M8 22h8"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="wine-content">
+                    <span class="section-label">Wine Collection</span>
+                    <h2 class="section-title">Extensive Wine Cellar</h2>
+                    <p class="wine-description">
+                        Our temperature-controlled wine cellar houses an impressive collection of premium wines 
+                        from around the world. From bold Austrian reds to elegant Pacific Northwest vintages, 
+                        our sommelier has curated each bottle to perfectly complement our menu.
+                    </p>
+                    <div class="wine-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">200+</span>
+                            <span class="stat-label">Wine Selections</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Countries</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">Expert</span>
+                            <span class="stat-label">Sommelier</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Reservations -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <span class="section-label">Get in Touch</span>
+                    <h2 class="section-title">Visit Us</h2>
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div>
+                                <h4>Location</h4>
+                                <p>829 Front St, Upstairs<br>Leavenworth, WA 98826</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div>
+                                <h4>Phone</h4>
+                                <p><a href="tel:+15095480600">+1 (509) 548-0600</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">✉️</div>
+                            <div>
+                                <h4>Email</h4>
+                                <p><a href="mailto:host@mozartsrestaurant.com">host@mozartsrestaurant.com</a></p>
+                                <p><a href="mailto:info@mozartsrestaurant.com">info@mozartsrestaurant.com</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">⏰</div>
+                            <div>
+                                <h4>Hours</h4>
+                                <p>Please contact us for current hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-wrapper">
+                    <div class="reservation-card glass-card">
+                        <h3>Reservations</h3>
+                        <p>For the best experience, we recommend making reservations in advance. Our high-value dining experience ($50-$100 per person) ensures every detail is perfect.</p>
+                        <button class="btn btn-primary btn-full" onclick="toggleChatbot()">
+                            <span>Chat with AI Concierge</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </button>
+                        <p class="note-text">
+                            <strong>Note:</strong> For groups or special events, please contact us directly. 
+                            Peak hours may require extra time for service - we recommend dining during off-peak times for quickest service.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Mozart's Restaurant</h3>
+                    <p>Fine European & Pacific Northwest Dining</p>
+                    <p class="footer-badge">Woman-Owned Business</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#menu">Menu</a></li>
+                        <li><a href="#events">Events</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact</h4>
+                    <p>829 Front St, Upstairs<br>Leavenworth, WA 98826</p>
+                    <p>Phone: (509) 548-0600</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Mozart's Restaurant. All rights reserved. | Website powered by AI</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Chatbot -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4>Mozart's AI Concierge</h4>
+                    <span class="chatbot-status">Online</span>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <p>Welcome to Mozart's Restaurant! 🎵</p>
+                    <p>I'm your AI Concierge, here to help with:</p>
+                    <ul>
+                        <li>Making reservations</li>
+                        <li>Menu questions & dietary options</li>
+                        <li>Live music schedule</li>
+                        <li>Wine recommendations</li>
+                        <li>Special events & group bookings</li>
+                    </ul>
+                    <p>How can I assist you today?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input 
+                type="text" 
+                id="chatbotInput" 
+                placeholder="Ask about reservations, menu, events..."
+                onkeypress="handleChatKeyPress(event)"
+            >
+            <button onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chatbot Toggle Button -->
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="chatbot-badge">AI</span>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>
