@@ -3,22 +3,6 @@ from flask_cors import CORS
 import google.generativeai as genai
 import os
 from datetime import datetime
-
-# Initialize Flask with static folder configuration to serve files from root
-app = Flask(__name__, static_url_path='', static_folder='.')
-CORS(app)  # Enable CORS for frontend communication
-
-# Configure Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyC8caaVnjDzywAnTNR_Nwbs64zW95DgdE8')
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Initialize Gemini model
-model = genai.GenerativeModel('gemini-1.5-flash')
-
-# Restaurant context for AI responses
-RESTAURANT_CONTEXT = """
-You are an AI Concierge for Mozart's Restaurant, a fine dining establishment in Leavenworth, WA.
-
 RESTAURANT INFORMATION:
 - Name: Mozart's Restaurant
 - Location: 829 Front St, Upstairs, Leavenworth, WA 98826, United States
