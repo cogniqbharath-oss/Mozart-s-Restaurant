@@ -8,7 +8,7 @@ app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
 
 # Configure Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyC8caaVnjDzywAnTNR_Nwbs64zW95DgdE8')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAPM43A3oyNDWnwI5-qP3KXM2fxzz1yt7U')
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Gemini model
@@ -18,7 +18,7 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 RESTAURANT_CONTEXT = """
 You are an AI Concierge for Mozart's Restaurant, a fine dining establishment in Leavenworth, WA.
 
-RESTAURANT INFORMATION:
+ RESTAURANT INFORMATION:
 - Name: Mozart's Restaurant
 - Location: 829 Front St, Upstairs, Leavenworth, WA 98826, United States
 - Phone: +1 (509) 548-0600
