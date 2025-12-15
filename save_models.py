@@ -2,7 +2,7 @@
 import requests
 import json
 
-API_KEY = "AIzaSyAiZobQ9Ra1cZkFdKeG5aXeDcOZGDq6i60"
+API_KEY = "AIzaSyBXGvwIWvxXh6ZlIHeInxPMi5m4CkIjIfA"
 url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
 
 response = requests.get(url)
