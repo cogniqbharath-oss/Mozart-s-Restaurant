@@ -9,6 +9,17 @@ export async function onRequest(context) {
         const data = await request.json();
         const userMessage = data.message || "";
 
+        // Ping check for debugging
+        if (userMessage.toLowerCase() === 'ping') {
+            return new Response(JSON.stringify({
+                success: true,
+                response: "Pong! API is working. 🏓",
+                timestamp: new Date().toISOString()
+            }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
         // Default API key or from environment variable
         const apiKey = env.GEMINI_API_KEY || "AIzaSyAiZobQ9Ra1cZkFdKeG5aXeDcOZGDq6i60";
 

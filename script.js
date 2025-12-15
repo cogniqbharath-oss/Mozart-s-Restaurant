@@ -108,6 +108,21 @@ async function sendMessage() {
             })
         });
 
+        if (!response.ok && response.status === 500) {
+            // Handle 500 error specifically
+            const text = await response.text();
+            try {
+                const data = JSON.parse(text);
+                addMessageToChat(`Error: ${data.message} ${data.details || ''}`, 'bot');
+            } catch (e) {
+                // Not JSON (e.g. Cloudflare error page)
+                addMessageToChat(`Server Error (500): The server encountered an error.`, 'bot');
+                console.error("Server returned 500 (Non-JSON):", text);
+            }
+            removeTypingIndicator();
+            return;
+        }
+
         const data = await response.json();
 
         // Remove typing indicator
