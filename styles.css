@@ -227,9 +227,20 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('assets/bar.png') center/cover;
-    opacity: 0.15;
+    background: url('assets/hero-bg-new.jpg') center/cover fixed no-repeat;
+    opacity: 0.25;
     z-index: 0;
+    animation: zoomEffect 20s infinite alternate;
+}
+
+@keyframes zoomEffect {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
 }
 
 .hero-content {
