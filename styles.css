@@ -1223,6 +1223,34 @@ section {
         display: flex;
     }
 
+    .nav-menu.active {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(10, 10, 20, 0.98);
+        backdrop-filter: blur(20px);
+        padding-top: 6rem;
+        gap: 2rem;
+        z-index: 999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 6px);
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -6px);
+    }
+
     .about-grid,
     .events-content,
     .wine-grid,

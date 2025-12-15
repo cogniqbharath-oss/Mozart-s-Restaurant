@@ -10,7 +10,7 @@ app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
 
 # Configure Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyBXGvwIWvxXh6ZlIHeInxPMi5m4CkIjIfA')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyBN1bO5cVgOOk590FLsHAJwwy2_7Tp7rgE')
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Gemini model

@@ -15,6 +15,7 @@ const navMenu = document.querySelector('.nav-menu');
 if (navToggle) {
     navToggle.addEventListener('click', () => {
         navMenu.classList.toggle('active');
+        navToggle.classList.toggle('active');
     });
 }
 
