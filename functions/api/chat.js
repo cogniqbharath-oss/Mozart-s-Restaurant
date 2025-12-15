@@ -130,7 +130,9 @@ Provide a helpful, professional response that addresses their needs while mainta
         return new Response(JSON.stringify({
             success: false,
             error: 'Internal server error',
-            message: 'Unable to process request. Please try again or call us directly at (509) 548-0600.'
+            message: error.message,
+            stack: error.stack,
+            details: 'Please share this error with the developer.'
         }), {
             status: 500,
             headers: { "Content-Type": "application/json" }

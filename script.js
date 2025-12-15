@@ -117,7 +117,8 @@ async function sendMessage() {
             // Add bot response to chat
             addMessageToChat(data.response, 'bot');
         } else {
-            addMessageToChat('I apologize, but I encountered an error. Please try calling us at (509) 548-0600 or emailing host@mozartsrestaurant.com for assistance.', 'bot');
+            // Debugging: Show actual error
+            addMessageToChat(`Error: ${data.message} ${data.details || ''}`, 'bot');
         }
     } catch (error) {
         console.error('Chat error:', error);
