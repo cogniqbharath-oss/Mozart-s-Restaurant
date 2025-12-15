@@ -105,7 +105,7 @@ Provide a helpful, professional response that addresses their needs while mainta
 `;
 
         // Call Gemini API via REST
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent?key=${apiKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
         const geminiResponse = await fetch(geminiUrl, {
             method: "POST",

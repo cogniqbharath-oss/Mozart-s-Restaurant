@@ -14,7 +14,7 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyBXGvwIWvxXh6ZlIHeInxPMi5m4Ck
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Gemini model
-model = genai.GenerativeModel('gemini-2.0-flash-lite-001')
+model = genai.GenerativeModel('gemini-flash-lite-latest')
 
 # Restaurant context for AI responses
 RESTAURANT_CONTEXT = """
