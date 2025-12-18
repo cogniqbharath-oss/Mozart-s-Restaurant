@@ -5,7 +5,7 @@ async function testGemini() {
     const prompt = "Hello, can you hear me?";
 
     // Call Gemini API via REST
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
     console.log("Testing Gemini API...");
     console.log("URL:", geminiUrl.replace(apiKey, "HIDDEN_KEY"));
