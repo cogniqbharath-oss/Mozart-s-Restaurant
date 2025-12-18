@@ -21,7 +21,7 @@ export async function onRequest(context) {
         }
 
         // Default API key or from environment variable
-        const apiKey = env.GEMINI_API_KEY || "AIzaSyBXGvwIWvxXh6ZlIHeInxPMi5m4CkIjIfA";
+        const apiKey = env.GEMINI_API_KEY || "AIzaSyAZ9V6eKyNIH4jNWulyMVJEsHIA3-GFNmw";
 
         if (!apiKey) {
             throw new Error("API Key not found");
