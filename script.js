@@ -38,167 +38,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Chatbot functionality
-let isChatbotOpen = false;
-const chatbotContainer = document.getElementById('chatbotContainer');
-const chatbotToggle = document.getElementById('chatbotToggle');
-const chatbotMessages = document.getElementById('chatbotMessages');
-const chatbotInput = document.getElementById('chatbotInput');
-
-function toggleChatbot() {
-    isChatbotOpen = !isChatbotOpen;
-    chatbotContainer.classList.toggle('active', isChatbotOpen);
-
-    if (isChatbotOpen) {
-        chatbotInput.focus();
-    }
-}
-
-// Handle Enter key in chat input
-function handleChatKeyPress(event) {
-    if (event.key === 'Enter') {
-        sendMessage();
-    }
-}
-
-// Send message to chatbot
-async function sendMessage() {
-    const message = chatbotInput.value.trim();
-
-    if (!message) return;
-
-    // Add user message to chat
-    addMessageToChat(message, 'user');
-
-    // Clear input
-    chatbotInput.value = '';
-
-    // Show typing indicator
-    showTypingIndicator();
-
-    try {
-        // Call API
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: message,
-                context: {
-                    restaurant_name: "Mozart's Restaurant",
-                    location: "829 Front St, Upstairs, Leavenworth, WA 98826",
-                    phone: "+1 509-548-0600",
-                    email: "host@mozartsrestaurant.com",
-                    price_range: "$50-$100 per person",
-                    specialties: [
-                        "Oktoberfest Sampler",
-                        "Pacific Northwest Salmon",
-                        "Wiener Schnitzel",
-                        "Wild Mushroom Risotto"
-                    ],
-                    live_music: "Every Friday 7:00 PM - 10:00 PM",
-                    dietary_options: "Gluten-free and vegetarian options available",
-                    pain_points: [
-                        "Reservation system currently being updated",
-                        "High-value dining - reservations recommended",
-                        "Service may be slower during peak hours",
-                        "Large groups require advance notice"
-                    ]
-                }
-            })
-        });
-
-        if (!response.ok && response.status === 500) {
-            // Handle 500 error specifically
-            const text = await response.text();
-            try {
-                const data = JSON.parse(text);
-                addMessageToChat(`Error: ${data.message} ${data.details || ''}`, 'bot');
-            } catch (e) {
-                // Not JSON (e.g. Cloudflare error page)
-                addMessageToChat(`Server Error (500): The server encountered an error.`, 'bot');
-                console.error("Server returned 500 (Non-JSON):", text);
-            }
-            removeTypingIndicator();
-            return;
-        }
-
-        const data = await response.json();
-
-        // Remove typing indicator
-        removeTypingIndicator();
-
-        if (data.success) {
-            // Add bot response to chat
-            addMessageToChat(data.response, 'bot');
-        } else {
-            // Debugging: Show actual error
-            addMessageToChat(`Error: ${data.message} ${data.details || ''}`, 'bot');
-        }
-    } catch (error) {
-        console.error('Chat error:', error);
-        removeTypingIndicator();
-        addMessageToChat('I apologize, but I\'m having trouble connecting right now. Please call us at (509) 548-0600 or email host@mozartsrestaurant.com to make a reservation.', 'bot');
-    }
-}
-
-// Add message to chat interface
-function addMessageToChat(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}-message`;
-
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.textContent = sender === 'user' ? 'You' : 'AI';
-
-    const content = document.createElement('div');
-    content.className = 'message-content';
-
-    // Simple markdown-like formatting
-    const formattedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-
-    content.innerHTML = `<p>${formattedText}</p>`;
-
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(content);
-
-    chatbotMessages.appendChild(messageDiv);
-
-    // Scroll to bottom
-    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-}
-
-// Show typing indicator
-function showTypingIndicator() {
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot-message typing-message';
-    typingDiv.id = 'typingIndicator';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.textContent = 'AI';
-
-    const indicator = document.createElement('div');
-    indicator.className = 'typing-indicator';
-    indicator.innerHTML = '<span></span><span></span><span></span>';
-
-    typingDiv.appendChild(avatar);
-    typingDiv.appendChild(indicator);
-
-    chatbotMessages.appendChild(typingDiv);
-    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-}
-
-// Remove typing indicator
-function removeTypingIndicator() {
-    const indicator = document.getElementById('typingIndicator');
-    if (indicator) {
-        indicator.remove();
-    }
-}
 
 // Intersection Observer for scroll animations
 const observerOptions = {
@@ -252,39 +91,11 @@ function formatPhoneNumber(phone) {
     return phone.replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, '+$1 ($2) $3-$4');
 }
 
-function getCurrentStatus() {
-    const hour = new Date().getHours();
-    const day = new Date().getDay();
-
-    // Friday live music notification
-    if (day === 5 && hour >= 19 && hour < 22) {
-        return 'Live Music Now Playing! 🎵';
-    }
-
-    // Peak hours warning
-    if (hour >= 18 && hour <= 21) {
-        return 'Peak Dining Hours - Reservations Recommended';
-    }
-
-    return 'Available for Reservations';
-}
-
-// Update status badge if exists
-const statusElements = document.querySelectorAll('.chatbot-status');
-statusElements.forEach(el => {
-    el.textContent = getCurrentStatus();
-});
-
 // Analytics tracking (placeholder)
 function trackEvent(category, action, label) {
     console.log('Event tracked:', { category, action, label });
     // Add your analytics tracking here (Google Analytics, etc.)
 }
-
-// Track chatbot interactions
-chatbotToggle?.addEventListener('click', () => {
-    trackEvent('Chatbot', isChatbotOpen ? 'Close' : 'Open', 'Toggle');
-});
 
 // Track menu card clicks
 document.querySelectorAll('.menu-card').forEach(card => {
@@ -307,31 +118,6 @@ document.querySelectorAll('img').forEach(img => {
         console.warn('Image failed to load:', this.src);
     });
 });
-
-// Quick suggestions for chatbot
-const quickSuggestions = [
-    "Make a reservation for tonight",
-    "What's the Oktoberfest Sampler?",
-    "Do you have gluten-free options?",
-    "When is live music?",
-    "What's your wine selection like?",
-    "Can you accommodate large groups?"
-];
-
-// Add quick suggestions to chatbot (optional enhancement)
-function addQuickSuggestions() {
-    const suggestionsHTML = quickSuggestions.map(suggestion =>
-        `<button class="quick-suggestion" onclick="selectSuggestion('${suggestion}')">${suggestion}</button>`
-    ).join('');
-
-    // You can add this to the chatbot interface if desired
-    console.log('Quick suggestions available:', quickSuggestions);
-}
-
-function selectSuggestion(suggestion) {
-    chatbotInput.value = suggestion;
-    sendMessage();
-}
 
 // Initialize
 console.log('Mozart\'s Restaurant website loaded successfully! 🎵');

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Page - Mozart's Restaurant Chatbot Integration</title>
+
+    <!-- Include your main styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Include chatbot styles -->
+    <link rel="stylesheet" href="chatbot.css">
+
+    <style>
+        /* Example page specific styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f5f5f5;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(139, 69, 19, 0.4);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #fbbf24;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-box {
+            background: rgba(79, 70, 229, 0.1);
+            border-left: 4px solid rgba(79, 70, 229, 0.6);
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Mozart's Restaurant</h1>
+            <p>Chatbot Worker Integration Example</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Welcome to the Chatbot Integration Demo</h2>
+            <p>
+                This page demonstrates how to integrate the Mozart's Restaurant AI Chatbot Worker
+                into any page of your website. The chatbot is fully functional and ready to use!
+            </p>
+
+            <div class="info-box">
+                <strong>💡 Try it out:</strong> Click the chatbot button in the bottom-right corner
+                or use the demo buttons below to interact with the chatbot programmatically.
+            </div>
+
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="toggleChatbot()">
+                    Open Chatbot
+                </button>
+                <button class="demo-btn" onclick="sendDemoMessage('What are your hours?')">
+                    Ask About Hours
+                </button>
+                <button class="demo-btn" onclick="sendDemoMessage('Do you have vegetarian options?')">
+                    Ask About Menu
+                </button>
+                <button class="demo-btn" onclick="showQuickSuggestions()">
+                    Show Quick Suggestions
+                </button>
+                <button class="demo-btn" onclick="showHistory()">
+                    Show Conversation History
+                </button>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>How It Works</h2>
+            <p>The chatbot worker is included with just a few lines of code:</p>
+
+            <div class="code-block">
+                <code>
+&lt;!-- In the &lt;head&gt; section --&gt;<br>
+&lt;link rel="stylesheet" href="chatbot.css"&gt;<br>
+<br>
+&lt;!-- Before closing &lt;/body&gt; tag --&gt;<br>
+&lt;script src="workers.js"&gt;&lt;/script&gt;<br>
+&lt;script src="script.js"&gt;&lt;/script&gt;
+                </code>
+            </div>
+
+            <p>Then include the chatbot HTML structure (see CHATBOT_README.md for details).</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Advanced Features</h2>
+            <ul>
+                <li>✅ Auto-initialization on page load</li>
+                <li>✅ Conversation history tracking</li>
+                <li>✅ Markdown-like message formatting</li>
+                <li>✅ Quick suggestion buttons</li>
+                <li>✅ Analytics integration</li>
+                <li>✅ Error handling with user-friendly messages</li>
+                <li>✅ Responsive design for all devices</li>
+                <li>✅ Keyboard shortcuts (Escape to close)</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Programmatic Control</h2>
+            <p>You can control the chatbot using JavaScript:</p>
+
+            <div class="code-block">
+                <code>
+// Access the global chatbot instance<br>
+const chatbot = window.mozartChatbot;<br>
+<br>
+// Send a message<br>
+chatbot.sendMessage("Hello!");<br>
+<br>
+// Add quick suggestions<br>
+chatbot.addQuickSuggestions([<br>
+&nbsp;&nbsp;"Make a reservation",<br>
+&nbsp;&nbsp;"View menu"<br>
+]);<br>
+<br>
+// Get conversation history<br>
+const history = chatbot.getHistory();<br>
+                </code>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Container -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h4>Mozart's AI Concierge</h4>
+                    <span class="chatbot-status">Online</span>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <p>Welcome to Mozart's Restaurant! 🎵</p>
+                    <p>I'm your AI Concierge, here to help with:</p>
+                    <ul>
+                        <li>Making reservations</li>
+                        <li>Menu questions & dietary options</li>
+                        <li>Live music schedule</li>
+                        <li>Wine recommendations</li>
+                        <li>Special events & group bookings</li>
+                    </ul>
+                    <p>How can I assist you today?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Ask about reservations, menu, events..."
+                onkeypress="handleChatKeyPress(event)">
+            <button onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13" />
+                    <path d="M22 2L15 22L11 13L2 9L22 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chatbot Toggle Button -->
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span class="chatbot-badge">AI</span>
+    </button>
+
+    <!-- Include chatbot worker -->
+    <script src="workers.js"></script>
+
+    <!-- Demo page specific scripts -->
+    <script>
+        // Demo functions for the example page
+        function sendDemoMessage(message) {
+            // Open chatbot first
+            if (window.mozartChatbot) {
+                window.mozartChatbot.open();
+                // Wait a bit for animation, then send message
+                setTimeout(() => {
+                    window.mozartChatbot.sendMessage(message);
+                }, 300);
+            }
+        }
+
+        function showQuickSuggestions() {
+            if (window.mozartChatbot) {
+                window.mozartChatbot.open();
+                setTimeout(() => {
+                    window.mozartChatbot.addQuickSuggestions([
+                        "Make a reservation for tonight",
+                        "What's the Oktoberfest Sampler?",
+                        "Do you have gluten-free options?",
+                        "When is live music?",
+                        "What's your wine selection like?",
+                        "Can you accommodate large groups?"
+                    ]);
+                }, 300);
+            }
+        }
+
+        function showHistory() {
+            if (window.mozartChatbot) {
+                const history = window.mozartChatbot.getHistory();
+                if (history.length === 0) {
+                    alert('No conversation history yet. Try sending some messages first!');
+                } else {
+                    console.log('Conversation History:', history);
+                    alert(`You have ${history.length} conversation(s). Check the browser console for details.`);
+                }
+            }
+        }
+
+        // Log when chatbot is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Example page loaded!');
+            console.log('Chatbot instance:', window.mozartChatbot);
+        });
+    </script>
+</body>
+
+</html>

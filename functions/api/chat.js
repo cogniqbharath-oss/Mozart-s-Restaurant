@@ -1,8 +1,24 @@
 export async function onRequest(context) {
     const { request, env } = context;
 
+    // Add CORS headers
+    const corsHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
+    };
+
+    // Handle OPTIONS request for CORS
+    if (request.method === 'OPTIONS') {
+        return new Response(null, { headers: corsHeaders });
+    }
+
     if (request.method !== "POST") {
-        return new Response("Method Not Allowed", { status: 405 });
+        return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+            status: 405,
+            headers: corsHeaders
+        });
     }
 
     try {
@@ -16,15 +32,15 @@ export async function onRequest(context) {
                 response: "Pong! API is working. 🏓",
                 timestamp: new Date().toISOString()
             }), {
-                headers: { "Content-Type": "application/json" }
+                headers: corsHeaders
             });
         }
 
-        // Default API key or from environment variable
-        const apiKey = env.GEMINI_API_KEY || "AIzaSyAZ9V6eKyNIH4jNWulyMVJEsHIA3-GFNmw";
+        // Get API key from environment or use default
+        const apiKey = env.GEMINI_API_KEY || "AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A";
 
         if (!apiKey) {
-            throw new Error("API Key not found");
+            throw new Error("API Key not configured");
         }
 
         // Context generation
@@ -104,49 +120,93 @@ ${userMessage}
 Provide a helpful, professional response that addresses their needs while maintaining the upscale, European fine dining atmosphere of Mozart's Restaurant. Be warm and engaging.
 `;
 
-        // Call Gemini API via REST
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+        // Try multiple models in order of preference
+        // Using models that are confirmed to work with this API
+        const models = [
+            'gemini-2.0-flash-lite',
+            'gemini-flash-lite-latest',
+            'gemini-2.5-flash-lite',
+            'gemini-2.0-flash',
+            'gemini-flash-latest'
+        ];
 
-        const geminiResponse = await fetch(geminiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            })
-        });
+        let lastError = null;
 
-        const geminiData = await geminiResponse.json();
+        for (const model of models) {
+            try {
+                console.log(`Trying model: ${model}`);
 
-        if (!geminiResponse.ok) {
-            console.error("Gemini API Error:", geminiData);
-            throw new Error(geminiData.error?.message || "Failed to fetch from Gemini");
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+                const geminiResponse = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1024,
+                        }
+                    })
+                });
+
+                const geminiData = await geminiResponse.json();
+
+                if (!geminiResponse.ok) {
+                    console.error(`Model ${model} failed:`, geminiData);
+                    lastError = geminiData;
+                    continue; // Try next model
+                }
+
+                // Check if response has the expected structure
+                if (!geminiData.candidates || !geminiData.candidates[0] ||
+                    !geminiData.candidates[0].content || !geminiData.candidates[0].content.parts) {
+                    console.error(`Model ${model} returned unexpected structure:`, geminiData);
+                    lastError = { error: { message: "Unexpected response structure" } };
+                    continue;
+                }
+
+                const aiResponse = geminiData.candidates[0].content.parts[0].text;
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    response: aiResponse,
+                    model: model,
+                    timestamp: new Date().toISOString()
+                }), {
+                    headers: corsHeaders
+                });
+
+            } catch (modelError) {
+                console.error(`Error with model ${model}:`, modelError);
+                lastError = modelError;
+                continue; // Try next model
+            }
         }
 
-        const aiResponse = geminiData.candidates[0].content.parts[0].text;
-
-        return new Response(JSON.stringify({
-            success: true,
-            response: aiResponse,
-            timestamp: new Date().toISOString()
-        }), {
-            headers: { "Content-Type": "application/json" }
-        });
+        // If all models failed, throw the last error
+        throw new Error(lastError?.error?.message || lastError?.message || "All models failed");
 
     } catch (error) {
         console.error("Function Error:", error);
-        return new Response(JSON.stringify({
+
+        // Provide detailed error information
+        const errorResponse = {
             success: false,
             error: 'Internal server error',
-            message: error.message,
-            stack: error.stack,
-            details: 'Please share this error with the developer.'
-        }), {
+            message: error.message || 'Unknown error occurred',
+            details: error.stack || 'No stack trace available',
+            timestamp: new Date().toISOString(),
+            suggestion: 'Please check your API key and try again. If the issue persists, contact support.'
+        };
+
+        return new Response(JSON.stringify(errorResponse), {
             status: 500,
-            headers: { "Content-Type": "application/json" }
+            headers: corsHeaders
         });
     }
 }

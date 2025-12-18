@@ -1,5 +1,5 @@
 
-const apiKey = "AIzaSyAZ9V6eKyNIH4jNWulyMVJEsHIA3-GFNmw";
+const apiKey = "AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A";
 
 async function testGemini() {
     const prompt = "Hello, can you hear me?";

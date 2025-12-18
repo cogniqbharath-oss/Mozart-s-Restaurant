@@ -10,11 +10,18 @@ app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
 
 # Configure Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAZ9V6eKyNIH4jNWulyMVJEsHIA3-GFNmw')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A')
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Initialize Gemini model
-model = genai.GenerativeModel('gemini-flash-lite-latest')
+# Initialize Gemini models to try (in order of preference)
+# Using models that are confirmed to work with this API key
+MODELS_TO_TRY = [
+    'models/gemini-2.0-flash-lite',
+    'models/gemini-flash-lite-latest',
+    'models/gemini-2.5-flash-lite',
+    'models/gemini-2.0-flash',
+    'models/gemini-flash-latest'
+]
 
 # Restaurant context for AI responses
 RESTAURANT_CONTEXT = """
@@ -84,12 +91,16 @@ def get_current_day_info():
     
     return info
 
-@app.route('/api/chat', methods=['POST'])
+@app.route('/api/chat', methods=['POST', 'OPTIONS'])
 def chat():
     """
     Main chat endpoint for Gemini AI integration
     Receives messages from frontend and returns AI responses
     """
+    # Handle CORS preflight
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+    
     try:
         # Get request data
         data = request.get_json()
@@ -102,6 +113,14 @@ def chat():
         
         user_message = data['message']
         context = data.get('context', {})
+        
+        # Ping check for debugging
+        if user_message.lower() == 'ping':
+            return jsonify({
+                'success': True,
+                'response': 'Pong! API is working. 🏓',
+                'timestamp': datetime.now().isoformat()
+            })
         
         # Build the complete prompt
         current_info = get_current_day_info()
@@ -116,17 +135,41 @@ CUSTOMER QUESTION/REQUEST:
 Provide a helpful, professional response that addresses their needs while maintaining the upscale, European fine dining atmosphere of Mozart's Restaurant. Be warm and engaging.
 """
         
-        # Generate response using Gemini
-        response = model.generate_content(prompt)
+        # Try multiple models
+        last_error = None
+        for model_name in MODELS_TO_TRY:
+            try:
+                print(f"Trying model: {model_name}")
+                model = genai.GenerativeModel(model_name)
+                
+                # Generate response using Gemini
+                response = model.generate_content(
+                    prompt,
+                    generation_config={
+                        'temperature': 0.7,
+                        'max_output_tokens': 1024,
+                    }
+                )
+                
+                # Extract the response text
+                ai_response = response.text
+                
+                print(f"✅ Success with model: {model_name}")
+                
+                return jsonify({
+                    'success': True,
+                    'response': ai_response,
+                    'model': model_name,
+                    'timestamp': datetime.now().isoformat()
+                })
+                
+            except Exception as model_error:
+                print(f"❌ Model {model_name} failed: {str(model_error)}")
+                last_error = model_error
+                continue  # Try next model
         
-        # Extract the response text
-        ai_response = response.text
-        
-        return jsonify({
-            'success': True,
-            'response': ai_response,
-            'timestamp': datetime.now().isoformat()
-        })
+        # If all models failed
+        raise Exception(f"All models failed. Last error: {str(last_error)}")
     
     except Exception as e:
         import traceback
@@ -138,7 +181,9 @@ Provide a helpful, professional response that addresses their needs while mainta
         return jsonify({
             'success': False,
             'error': 'Internal server error',
-            'message': 'Unable to process request. Please try again or call us directly at (509) 548-0600.'
+            'message': str(e),
+            'details': 'Unable to process request. Please try again or call us directly at (509) 548-0600.',
+            'timestamp': datetime.now().isoformat()
         }), 500
 
 @app.route('/api/health', methods=['GET'])

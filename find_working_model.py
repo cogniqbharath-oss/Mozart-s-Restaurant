@@ -3,7 +3,7 @@ import requests
 import json
 import time
 
-API_KEY = "AIzaSyAZ9V6eKyNIH4jNWulyMVJEsHIA3-GFNmw"
+API_KEY = "AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A"
 
 def get_models():
     url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"

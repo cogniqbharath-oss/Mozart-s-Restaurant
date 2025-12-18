@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Test - Mozart's Restaurant</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="chatbot.css">
+    <style>
+        body {
+            padding: 40px;
+            background: #1a1a2e;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #8b4513, #a0522d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 1rem;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(139, 69, 19, 0.4);
+        }
+
+        .status {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🎵 Chatbot Test Page</h1>
+        <p>This page tests if the chatbot is working correctly.</p>
+
+        <div id="status" class="status">
+            <h3>Status: Checking...</h3>
+            <p id="statusMessage">Please wait...</p>
+        </div>
+
+        <h2>Test Buttons</h2>
+        <button class="test-button" onclick="testToggle()">Test Toggle Chatbot</button>
+        <button class="test-button" onclick="testOpen()">Test Open Chatbot</button>
+        <button class="test-button" onclick="testSendMessage()">Test Send Message</button>
+        <button class="test-button" onclick="checkStatus()">Check Status</button>
+
+        <h2>Console Output</h2>
+        <p>Open the browser console (F12) to see detailed logs.</p>
+    </div>
+
+    <!-- AI Chatbot Container -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h4>Mozart's AI Concierge</h4>
+                    <span class="chatbot-status">Online</span>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <p>Welcome to Mozart's Restaurant! 🎵</p>
+                    <p>I'm your AI Concierge. How can I assist you today?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Ask about reservations, menu, events..."
+                onkeypress="handleChatKeyPress(event)">
+            <button onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13" />
+                    <path d="M22 2L15 22L11 13L2 9L22 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chatbot Toggle Button -->
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span class="chatbot-badge">AI</span>
+    </button>
+
+    <script src="workers.js"></script>
+
+    <script>
+        // Test functions
+        function testToggle() {
+            console.log('🧪 Testing toggleChatbot()...');
+            if (typeof toggleChatbot === 'function') {
+                toggleChatbot();
+                updateStatus('✅ toggleChatbot() executed successfully!', false);
+            } else {
+                updateStatus('❌ toggleChatbot() function not found!', true);
+            }
+        }
+
+        function testOpen() {
+            console.log('🧪 Testing direct open...');
+            if (window.mozartChatbot) {
+                window.mozartChatbot.open();
+                updateStatus('✅ Chatbot opened successfully!', false);
+            } else {
+                updateStatus('❌ mozartChatbot instance not found!', true);
+            }
+        }
+
+        function testSendMessage() {
+            console.log('🧪 Testing send message...');
+            if (window.mozartChatbot) {
+                window.mozartChatbot.open();
+                setTimeout(() => {
+                    window.mozartChatbot.sendMessage('Test message from test page');
+                    updateStatus('✅ Test message sent!', false);
+                }, 500);
+            } else {
+                updateStatus('❌ mozartChatbot instance not found!', true);
+            }
+        }
+
+        function checkStatus() {
+            console.log('🧪 Checking chatbot status...');
+            const checks = {
+                'toggleChatbot function': typeof toggleChatbot === 'function',
+                'sendMessage function': typeof sendMessage === 'function',
+                'handleChatKeyPress function': typeof handleChatKeyPress === 'function',
+                'MozartChatbot class': typeof MozartChatbot === 'function',
+                'mozartChatbot instance': window.mozartChatbot !== null && window.mozartChatbot !== undefined,
+                'Container element': document.getElementById('chatbotContainer') !== null,
+                'Toggle button': document.getElementById('chatbotToggle') !== null,
+                'Messages container': document.getElementById('chatbotMessages') !== null,
+                'Input field': document.getElementById('chatbotInput') !== null
+            };
+
+            let allPassed = true;
+            let message = '<h3>Chatbot Status Check:</h3><ul>';
+
+            for (const [check, passed] of Object.entries(checks)) {
+                message += `<li>${passed ? '✅' : '❌'} ${check}</li>`;
+                if (!passed) allPassed = false;
+            }
+
+            message += '</ul>';
+
+            if (allPassed) {
+                message += '<p><strong>✅ All checks passed! Chatbot should be working.</strong></p>';
+            } else {
+                message += '<p><strong>❌ Some checks failed. See console for details.</strong></p>';
+            }
+
+            document.getElementById('statusMessage').innerHTML = message;
+            document.getElementById('status').className = allPassed ? 'status' : 'status error';
+
+            console.log('Status checks:', checks);
+        }
+
+        function updateStatus(message, isError) {
+            document.getElementById('statusMessage').innerHTML = `<p>${message}</p>`;
+            document.getElementById('status').className = isError ? 'status error' : 'status';
+        }
+
+        // Auto-check status when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkStatus();
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>
