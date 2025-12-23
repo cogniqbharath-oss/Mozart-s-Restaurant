@@ -5,18 +5,30 @@ import os
 from datetime import datetime
 import json
 import urllib.request
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Initialize Flask with static folder configuration to serve files from root
 app = Flask(__name__, static_url_path='', static_folder='.')
 CORS(app)  # Enable CORS for frontend communication
 
 # Configure Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A')
+# It's recommended to set this in a .env file
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+if not GEMINI_API_KEY:
+    # Fallback to hardcoded key only if .env is missing (NOT RECOMMENDED)
+    GEMINI_API_KEY = 'AIzaSyCTgPLJ1WqlnO02lqwfMUamHZlpD6CT3vg'
+
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Gemini models to try (in order of preference)
 # Using models that are confirmed to work with this API key
 MODELS_TO_TRY = [
     'models/gemini-2.0-flash-lite',
+    'models/gemini-1.5-flash',
+    'models/gemini-1.5-flash-8b',
     'models/gemini-flash-lite-latest',
     'models/gemini-2.5-flash-lite',
     'models/gemini-2.0-flash',
@@ -25,50 +37,37 @@ MODELS_TO_TRY = [
 
 # Restaurant context for AI responses
 RESTAURANT_CONTEXT = """
-You are an AI Concierge for Mozart's Restaurant, a fine dining establishment in Leavenworth, WA.
+You are the "Mozart's AI Concierge", a sophisticated and helpful AI assistant for Mozart's Restaurant in Leavenworth, WA.
+You are powered by Google Gemini 1.5 Flash technology.
 
- RESTAURANT INFORMATION:
+STRICT INSTRUCTIONS:
+1. ONLY provide information about Mozart's Restaurant. If asked about other topics, politely redirect to restaurant services.
+2. NEVER guess or hallucinate. If you don't know something, offer to have a human staff member contact them.
+3. PREVENT HALLUCINATION: Accuracy is paramount for high-value dining. If asked for specific recipes or internal secrets, politely decline and offer menu descriptions.
+4. LEAD CAPTURE: If the user expresses interest in booking, events, or catering, encourage them to provide their contact details. Note: The frontend handles some state, but you should be proactive in asking if the flow feels natural.
+
+RESTAURANT KNOWLEDGE BASE:
 - Name: Mozart's Restaurant
-- Location: 829 Front St, Upstairs, Leavenworth, WA 98826, United States
-- Phone: +1 (509) 548-0600
-- Email: host@mozartsrestaurant.com, info@mozartsrestaurant.com
-- Website: mozartsrestaurant.com
-- Type: Woman-owned fine European/Austrian and Pacific Northwest cuisine
-- Price Range: $50-$100 per person
-- Atmosphere: Romantic, upscale fine dining
+- Ownership: Woman-owned since 1980.
+- Location: 829 Front St, Upstairs, Leavenworth, WA 98826.
+- Atmosphere: Romantic, European Elegance, Fine Dining.
+- Cuisine: Modern European, Austrian specialties, and Pacific Northwest fusion.
+- Price Point: $50-$100 per person.
 
-MENU HIGHLIGHTS:
-- Oktoberfest Sampler (seasonal specialty)
-- Pacific Northwest Salmon ($42)
-- Wiener Schnitzel ($38)
-- Wild Mushroom Risotto ($32)
-- Extensive wine cellar with 200+ selections from 15+ countries
-- Gluten-free and vegetarian options available
+KEY SERVICES & FEATURES:
+- Live Music: Every Friday night (7:00 PM - 10:00 PM).
+- Wine Cellar: Extensive, temperature-controlled, 200+ selections.
+- Dietary: High focus on Gluten-Free (GF) and Vegetarian (V) options.
+- Signature Dish: Oktoberfest Sampler (Bratwurst, schnitzel, sauerkraut, spätzle).
+- Other Dishes: PNW Salmon ($42), Wiener Schnitzel ($38), Wild Mushroom Risotto ($32).
 
-SPECIAL FEATURES:
-- Live music every Friday night (7:00 PM - 10:00 PM)
-- Extensive temperature-controlled wine cellar
-- Seasonal specialties and chef-driven menu
-- Special dietary accommodations (gluten-free, vegetarian)
+OPERATIONAL NOTES:
+- Reservations: SYSTEM IS CURRENTLY BEING UPDATED. Customers MUST call +1 509-548-0600 or email host@mozartsrestaurant.com.
+- Peak Hours: 6:00 PM - 9:00 PM. Service may be slower; off-peak visits recommended for speed.
+- Groups: Large groups require advance notice.
 
-IMPORTANT POLICIES & PAIN POINTS:
-1. RESERVATION SYSTEM: Currently being updated. Customers should call (509) 548-0600 or email for reservations.
-2. HIGH-VALUE DINING: $50-$100 per person - advanced reservations strongly recommended
-3. NO-SHOW PREVENTION: Due to high-value dining, we encourage confirmation calls 24 hours before
-4. SERVICE TIMING: Peak hours (6pm-9pm) may have slower service. Off-peak dining recommended for faster service.
-5. LARGE GROUPS: Require advance notice and coordination
-
-YOUR ROLE:
-- Help customers make reservations (collect: name, date, time, party size, special requests)
-- Answer questions about menu, dietary options, pricing
-- Provide information about live music schedule and special events
-- Recommend dishes and wine pairings
-- Address the restaurant's pain points proactively
-- Be warm, professional, and reflect the upscale European dining experience
-- If unable to complete a reservation online, direct them to call or email
-
-IMPORTANT: Always be helpful, professional, and convey the premium nature of Mozart's dining experience.
-When helping with reservations, collect all necessary details and inform them you'll have the restaurant confirm via phone or email.
+RESPONSE TONE:
+Warm, professional, sophisticated, and human-like. Reflect the high-value fine dining experience.
 """
 
 def get_current_day_info():
@@ -154,7 +153,7 @@ Provide a helpful, professional response that addresses their needs while mainta
                 # Extract the response text
                 ai_response = response.text
                 
-                print(f"✅ Success with model: {model_name}")
+                print(f"Success with model: {model_name}")
                 
                 return jsonify({
                     'success': True,
@@ -164,7 +163,7 @@ Provide a helpful, professional response that addresses their needs while mainta
                 })
                 
             except Exception as model_error:
-                print(f"❌ Model {model_name} failed: {str(model_error)}")
+                print(f"Model {model_name} failed: {str(model_error)}")
                 last_error = model_error
                 continue  # Try next model
         

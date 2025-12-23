@@ -374,24 +374,21 @@
                     <span class="chatbot-status">Online</span>
                 </div>
             </div>
-            <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+            <div class="chatbot-header-actions">
+                <button class="chatbot-clear" onclick="clearChat()" title="Clear Chat">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                </button>
+                <button class="chatbot-close" onclick="toggleChatbot()">&times;</button>
+            </div>
         </div>
         <div class="chatbot-messages" id="chatbotMessages">
-            <div class="message bot-message">
-                <div class="message-avatar">AI</div>
-                <div class="message-content">
-                    <p>Welcome to Mozart's Restaurant! 🎵</p>
-                    <p>I'm your AI Concierge, here to help with:</p>
-                    <ul>
-                        <li>Making reservations</li>
-                        <li>Menu questions & dietary options</li>
-                        <li>Live music schedule</li>
-                        <li>Wine recommendations</li>
-                        <li>Special events & group bookings</li>
-                    </ul>
-                    <p>How can I assist you today?</p>
-                </div>
-            </div>
+            <!-- Messages will be injected here -->
+        </div>
+        <div id="chatbotSuggestions" class="chatbot-suggestions">
+            <!-- Chips will be injected here -->
         </div>
         <div class="chatbot-input">
             <input type="text" id="chatbotInput" placeholder="Ask about reservations, menu, events..."

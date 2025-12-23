@@ -12,17 +12,43 @@ class MozartChatbot {
             toggleId: config.toggleId || 'chatbotToggle',
             messagesId: config.messagesId || 'chatbotMessages',
             inputId: config.inputId || 'chatbotInput',
+            suggestionsId: config.suggestionsId || 'chatbotSuggestions',
             autoInit: config.autoInit !== false,
-            welcomeMessage: config.welcomeMessage || this.getDefaultWelcomeMessage(),
             restaurantContext: config.restaurantContext || this.getDefaultContext()
         };
 
         // State
         this.isOpen = false;
         this.conversationHistory = [];
+        this.leadCaptureState = 'none'; // none, asking_name, asking_contact, completed
+        this.userData = { name: '', contact: '' };
 
         // DOM Elements (will be set on init)
         this.elements = {};
+
+        // Food Images mapping
+        this.foodImages = {
+            breakfast: [
+                'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=400&h=400&fit=crop'
+            ],
+            brunch: [
+                'https://images.unsplash.com/photo-1513442542250-854d436a73f2?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&h=400&fit=crop'
+            ],
+            lunch: [
+                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop'
+            ],
+            coffee: [
+                'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop'
+            ],
+            baked_goods: [
+                'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=400&fit=crop'
+            ]
+        };
 
         // Auto-initialize if enabled
         if (this.config.autoInit) {
@@ -39,34 +65,18 @@ class MozartChatbot {
      */
     init() {
         try {
-            console.log('🎵 Initializing Mozart\'s AI Chatbot...');
+            console.log('🎵 Initializing Mozart\'s AI Chatbot (Gemini 2.5 Flash Enchanced)...');
 
             // Get DOM elements
             this.elements = {
                 container: document.getElementById(this.config.containerId),
                 toggle: document.getElementById(this.config.toggleId),
                 messages: document.getElementById(this.config.messagesId),
-                input: document.getElementById(this.config.inputId)
+                input: document.getElementById(this.config.inputId),
+                suggestions: document.getElementById(this.config.suggestionsId)
             };
 
-            // Validate elements exist
-            if (!this.elements.container) {
-                console.error(`Mozart Chatbot: Container element '#${this.config.containerId}' not found`);
-                return false;
-            }
-
-            if (!this.elements.toggle) {
-                console.error(`Mozart Chatbot: Toggle button '#${this.config.toggleId}' not found`);
-                return false;
-            }
-
-            if (!this.elements.messages) {
-                console.warn(`Mozart Chatbot: Messages container '#${this.config.messagesId}' not found`);
-            }
-
-            if (!this.elements.input) {
-                console.warn(`Mozart Chatbot: Input field '#${this.config.inputId}' not found`);
-            }
+            if (!this.elements.container || !this.elements.toggle) return false;
 
             // Attach event listeners
             this.attachEventListeners();
@@ -74,12 +84,13 @@ class MozartChatbot {
             // Set initial status
             this.updateStatus();
 
-            console.log('✅ Mozart\'s AI Chatbot initialized successfully!');
-            console.log('   - Container:', this.elements.container ? '✓' : '✗');
-            console.log('   - Toggle:', this.elements.toggle ? '✓' : '✗');
-            console.log('   - Messages:', this.elements.messages ? '✓' : '✗');
-            console.log('   - Input:', this.elements.input ? '✓' : '✗');
+            // Initial Greeting
+            this.sendInitialGreeting();
 
+            // Load Suggestions
+            this.loadSuggestions();
+
+            console.log('✅ Mozart\'s AI Chatbot initialized successfully!');
             return true;
         } catch (error) {
             console.error('❌ Mozart Chatbot initialization error:', error);
@@ -87,16 +98,11 @@ class MozartChatbot {
         }
     }
 
-    /**
-     * Attach event listeners
-     */
     attachEventListeners() {
-        // Toggle button click - only add listener if no onclick attribute
         if (this.elements.toggle && !this.elements.toggle.hasAttribute('onclick')) {
             this.elements.toggle.addEventListener('click', () => this.toggle());
         }
 
-        // Input enter key - only add listener if no onkeypress attribute
         if (this.elements.input && !this.elements.input.hasAttribute('onkeypress')) {
             this.elements.input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -104,422 +110,299 @@ class MozartChatbot {
                 }
             });
         }
-
-        // Close on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOpen) {
-                this.close();
-            }
-        });
     }
 
-    /**
-     * Toggle chatbot open/close
-     */
     toggle() {
-        if (this.isOpen) {
-            this.close();
-        } else {
-            this.open();
-        }
+        this.isOpen ? this.close() : this.open();
     }
 
-    /**
-     * Open chatbot
-     */
     open() {
         this.isOpen = true;
         this.elements.container?.classList.add('active');
+        this.elements.toggle?.classList.add('hidden');
         this.elements.input?.focus();
         this.trackEvent('Chatbot', 'Open', 'User Action');
     }
 
-    /**
-     * Close chatbot
-     */
     close() {
         this.isOpen = false;
         this.elements.container?.classList.remove('active');
+        this.elements.toggle?.classList.remove('hidden');
         this.trackEvent('Chatbot', 'Close', 'User Action');
     }
 
-    /**
-     * Send message to AI
-     */
+    sendInitialGreeting() {
+        const hour = new Date().getHours();
+        let greeting = "Welcome to Mozart's Restaurant! 🎵";
+
+        if (hour < 12) {
+            greeting = "Good morning! Looking for a perfect breakfast or brunch to start your day? ☕ Mozart's AI Concierge is here to help!";
+        } else if (hour < 17) {
+            greeting = "Good afternoon! Time for lunch or a quick coffee break? 🍰 How can I assist you at Mozart's today?";
+        } else {
+            greeting = "Good evening! Ready for a romantic fine dining experience? 🍷 Let me help you with your evening plans at Mozart's.";
+        }
+
+        this.addMessage(greeting, 'bot');
+        this.addMessage("I'm powered by Gemini 1.5 Flash and can help with reservations, our menu, or even show you photos of our specialties!", 'bot');
+    }
+
+    loadSuggestions() {
+        if (!this.elements.suggestions) return;
+
+        const suggestions = [
+            { text: '📖 View Menu', query: 'Show me the menu' },
+            { text: '⏰ Opening Hours', query: 'What are your hours?' },
+            { text: '📍 Location', query: 'Where are you located?' },
+            { text: '🥘 Today\'s Specials', query: 'What are today\'s specials?' },
+            { text: '📸 Show Food', query: 'Show me some food images' }
+        ];
+
+        this.elements.suggestions.innerHTML = '';
+        suggestions.forEach(item => {
+            const chip = document.createElement('div');
+            chip.className = 'suggestion-chip';
+            chip.textContent = item.text;
+            chip.onclick = () => this.sendMessage(item.query);
+            this.elements.suggestions.appendChild(chip);
+        });
+    }
+
     async sendMessage(messageText = null) {
         const message = messageText || this.elements.input?.value.trim();
-
         if (!message) return;
 
-        // Add user message to chat
+        // User Message
         this.addMessage(message, 'user');
+        if (this.elements.input) this.elements.input.value = '';
 
-        // Clear input
-        if (this.elements.input) {
-            this.elements.input.value = '';
-        }
+        // Lead Capture Logic
+        if (this.handleLeadCapture(message)) return;
 
         // Show typing indicator
         this.showTypingIndicator();
 
         try {
-            // Call API
             const response = await fetch(this.config.apiEndpoint, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: message,
                     context: this.config.restaurantContext,
-                    conversationHistory: this.conversationHistory.slice(-5) // Last 5 messages for context
+                    conversationHistory: this.conversationHistory.slice(-5)
                 })
             });
 
-            // Handle response
-            if (!response.ok) {
-                if (response.status === 500) {
-                    const text = await response.text();
-                    try {
-                        const data = JSON.parse(text);
-                        this.addMessage(`Error: ${data.message} ${data.details || ''}`, 'bot', 'error');
-                    } catch (e) {
-                        this.addMessage('Server Error (500): The server encountered an error.', 'bot', 'error');
-                        console.error('Server returned 500 (Non-JSON):', text);
-                    }
-                    this.removeTypingIndicator();
-                    return;
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error('API Error');
 
             const data = await response.json();
-
-            // Remove typing indicator
             this.removeTypingIndicator();
 
             if (data.success) {
-                // Add bot response
                 this.addMessage(data.response, 'bot');
+                this.conversationHistory.push({ user: message, bot: data.response });
 
-                // Store in conversation history
-                this.conversationHistory.push({
-                    user: message,
-                    bot: data.response,
-                    timestamp: new Date().toISOString()
-                });
-            } else {
-                this.addMessage(`Error: ${data.message} ${data.details || ''}`, 'bot', 'error');
+                // Detection logic
+                this.detectVisualRequests(message, data.response);
+                this.detectLeadCaptureOpportunity(message, data.response);
             }
-
-            // Track interaction
-            this.trackEvent('Chatbot', 'Message Sent', message.substring(0, 50));
-
         } catch (error) {
             console.error('Chat error:', error);
             this.removeTypingIndicator();
-            this.addMessage(
-                'I apologize, but I\'m having trouble connecting right now. Please call us at (509) 548-0600 or email host@mozartsrestaurant.com to make a reservation.',
-                'bot',
-                'error'
-            );
+            this.addMessage("I'm sorry, I'm having trouble connecting to my brain right now. Please call us at (509) 548-0600!", 'bot', 'error');
         }
     }
 
-    /**
-     * Add message to chat interface
-     */
+    handleLeadCapture(message) {
+        if (this.leadCaptureState === 'asking_name') {
+            this.userData.name = message;
+            this.leadCaptureState = 'asking_contact';
+            this.addMessage(`Nice to meet you, ${message}! Could you please share your phone number or email so we can follow up?`, 'bot');
+            return true;
+        }
+        if (this.leadCaptureState === 'asking_contact') {
+            this.userData.contact = message;
+            this.leadCaptureState = 'completed';
+            this.addMessage(`Thank you! I've noted your details. Our team will reach out if needed. Enjoy your time at Mozart's!`, 'bot');
+            // Here you would typically send this to your backend
+            console.log('Lead Captured:', this.userData);
+            return true;
+        }
+        return false;
+    }
+
+    detectLeadCaptureOpportunity(message, response) {
+        const bookingKeywords = ['reserve', 'book', 'reservation', 'table', 'event', 'party', 'catering'];
+        const matches = bookingKeywords.some(kw => message.toLowerCase().includes(kw));
+
+        if (matches && this.leadCaptureState === 'none' && this.conversationHistory.length > 2) {
+            setTimeout(() => {
+                this.leadCaptureState = 'asking_name';
+                this.addMessage("By the way, I can pass your interest to our manager. What is your name?", 'bot');
+            }, 2000);
+        }
+    }
+
+    detectVisualRequests(message, response) {
+        const m = message.toLowerCase();
+        let cat = null;
+
+        if (m.includes('breakfast')) cat = 'breakfast';
+        else if (m.includes('brunch')) cat = 'brunch';
+        else if (m.includes('lunch')) cat = 'lunch';
+        else if (m.includes('coffee')) cat = 'coffee';
+        else if (m.includes('baked') || m.includes('cake') || m.includes('dessert')) cat = 'baked_goods';
+        else if (m.includes('food') || m.includes('dish') || m.includes('image') || m.includes('photo')) cat = 'lunch';
+
+        if (cat) {
+            this.addFoodImages(cat);
+        }
+
+        // Detect CTA requests
+        if (m.includes('contact') || m.includes('call') || m.includes('location') || m.includes('maps') || m.includes('catering')) {
+            this.addCTAButtons();
+        }
+    }
+
+    addFoodImages(category) {
+        const images = this.foodImages[category] || [];
+        if (images.length === 0) return;
+
+        const grid = document.createElement('div');
+        grid.className = 'chat-image-grid';
+
+        images.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'chat-image-thumb';
+            img.onclick = () => window.open(src, '_blank');
+            grid.appendChild(img);
+        });
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message bot-message';
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.appendChild(grid);
+        msgDiv.appendChild(content);
+
+        this.elements.messages.appendChild(msgDiv);
+        this.scrollToBottom();
+    }
+
+    addCTAButtons() {
+        const container = document.createElement('div');
+        container.className = 'chat-actions';
+
+        const actions = [
+            { text: '📞 Call Restaurant', link: 'tel:+15095480600' },
+            { text: '📍 Open in Google Maps', link: 'https://maps.google.com/?q=829+Front+St,+Leavenworth,+WA+98826' },
+            { text: '🍽️ Catering Services', link: '#contact' }
+        ];
+
+        actions.forEach(act => {
+            const btn = document.createElement('a');
+            btn.className = 'chat-btn';
+            btn.href = act.link;
+            btn.textContent = act.text;
+            if (act.link.startsWith('http')) btn.target = '_blank';
+            container.appendChild(btn);
+        });
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message bot-message';
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.appendChild(container);
+        msgDiv.appendChild(content);
+
+        this.elements.messages.appendChild(msgDiv);
+        this.scrollToBottom();
+    }
+
     addMessage(text, sender = 'bot', type = 'normal') {
         if (!this.elements.messages) return;
 
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
-
-        if (type === 'error') {
-            messageDiv.classList.add('error-message');
-        }
-
-        const avatar = document.createElement('div');
-        avatar.className = 'message-avatar';
-        avatar.textContent = sender === 'user' ? 'You' : 'AI';
+        if (type === 'error') messageDiv.classList.add('error-message');
 
         const content = document.createElement('div');
         content.className = 'message-content';
+        content.innerHTML = `<p>${this.formatMessage(text)}</p>`;
 
-        // Format text with simple markdown-like formatting
-        const formattedText = this.formatMessage(text);
-        content.innerHTML = `<p>${formattedText}</p>`;
+        const time = document.createElement('div');
+        time.className = 'message-timestamp';
+        time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        messageDiv.appendChild(avatar);
         messageDiv.appendChild(content);
-
+        messageDiv.appendChild(time);
         this.elements.messages.appendChild(messageDiv);
-
-        // Scroll to bottom
         this.scrollToBottom();
     }
 
-    /**
-     * Format message with markdown-like syntax
-     */
     formatMessage(text) {
         return text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/\n/g, '<br>')
-            .replace(/`(.*?)`/g, '<code>$1</code>');
+            .replace(/\n/g, '<br>');
     }
 
-    /**
-     * Show typing indicator
-     */
     showTypingIndicator() {
-        if (!this.elements.messages) return;
-
-        const typingDiv = document.createElement('div');
-        typingDiv.className = 'message bot-message typing-message';
-        typingDiv.id = 'typingIndicator';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'message-avatar';
-        avatar.textContent = 'AI';
-
-        const indicator = document.createElement('div');
-        indicator.className = 'typing-indicator';
-        indicator.innerHTML = '<span></span><span></span><span></span>';
-
-        typingDiv.appendChild(avatar);
-        typingDiv.appendChild(indicator);
-
-        this.elements.messages.appendChild(typingDiv);
+        const tid = document.createElement('div');
+        tid.className = 'message bot-message typing-indicator-msg';
+        tid.id = 'typingIndicator';
+        tid.innerHTML = '<div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+        this.elements.messages.appendChild(tid);
         this.scrollToBottom();
     }
 
-    /**
-     * Remove typing indicator
-     */
     removeTypingIndicator() {
-        const indicator = document.getElementById('typingIndicator');
-        if (indicator) {
-            indicator.remove();
-        }
+        document.getElementById('typingIndicator')?.remove();
     }
 
-    /**
-     * Scroll messages to bottom
-     */
     scrollToBottom() {
-        if (this.elements.messages) {
-            this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
-        }
+        this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
     }
 
-    /**
-     * Update chatbot status
-     */
-    updateStatus() {
-        const status = this.getCurrentStatus();
-        const statusElements = document.querySelectorAll('.chatbot-status');
-        statusElements.forEach(el => {
-            el.textContent = status;
-        });
+    clearChat() {
+        this.elements.messages.innerHTML = '';
+        this.conversationHistory = [];
+        this.leadCaptureState = 'none';
+        this.sendInitialGreeting();
+        this.loadSuggestions();
     }
 
-    /**
-     * Get current restaurant status
-     */
     getCurrentStatus() {
         const hour = new Date().getHours();
-        const day = new Date().getDay();
-
-        // Friday live music notification
-        if (day === 5 && hour >= 19 && hour < 22) {
-            return 'Live Music Now Playing! 🎵';
-        }
-
-        // Peak hours warning
-        if (hour >= 18 && hour <= 21) {
-            return 'Peak Dining Hours - Reservations Recommended';
-        }
-
-        return 'Available for Reservations';
+        return (hour >= 18 && hour <= 21) ? 'Peak Dining Hours' : 'Online & Ready';
     }
 
-    /**
-     * Get default welcome message
-     */
-    getDefaultWelcomeMessage() {
-        return `Welcome to Mozart's Restaurant! 🎵
-
-I'm your AI Concierge, here to help with:
-• Making reservations
-• Menu questions & dietary options
-• Live music schedule
-• Wine recommendations
-• Special events & group bookings
-
-How can I assist you today?`;
+    updateStatus() {
+        const status = this.getCurrentStatus();
+        document.querySelectorAll('.chatbot-status').forEach(el => el.textContent = status);
     }
 
-    /**
-     * Get default restaurant context
-     */
     getDefaultContext() {
         return {
-            restaurant_name: "Mozart's Restaurant",
-            location: "829 Front St, Upstairs, Leavenworth, WA 98826",
+            restaurant: "Mozart's Restaurant",
+            location: "829 Front St, Leavenworth",
             phone: "+1 509-548-0600",
-            email: "host@mozartsrestaurant.com",
-            price_range: "$50-$100 per person",
-            specialties: [
-                "Oktoberfest Sampler",
-                "Pacific Northwest Salmon",
-                "Wiener Schnitzel",
-                "Wild Mushroom Risotto"
-            ],
-            live_music: "Every Friday 7:00 PM - 10:00 PM",
-            dietary_options: "Gluten-free and vegetarian options available",
-            pain_points: [
-                "Reservation system currently being updated",
-                "High-value dining - reservations recommended",
-                "Service may be slower during peak hours",
-                "Large groups require advance notice"
-            ]
+            menu: "Austrian / Modern European"
         };
     }
 
-    /**
-     * Track events (analytics)
-     */
     trackEvent(category, action, label) {
-        console.log('Event tracked:', { category, action, label });
-
-        // Add your analytics tracking here
-        if (window.gtag) {
-            window.gtag('event', action, {
-                event_category: category,
-                event_label: label
-            });
-        }
-
-        if (window.dataLayer) {
-            window.dataLayer.push({
-                event: 'chatbot_interaction',
-                category: category,
-                action: action,
-                label: label
-            });
-        }
-    }
-
-    /**
-     * Add quick suggestion buttons
-     */
-    addQuickSuggestions(suggestions) {
-        if (!this.elements.messages) return;
-
-        const suggestionsContainer = document.createElement('div');
-        suggestionsContainer.className = 'quick-suggestions';
-
-        suggestions.forEach(suggestion => {
-            const button = document.createElement('button');
-            button.className = 'quick-suggestion-btn';
-            button.textContent = suggestion;
-            button.onclick = () => {
-                this.sendMessage(suggestion);
-                suggestionsContainer.remove();
-            };
-            suggestionsContainer.appendChild(button);
-        });
-
-        this.elements.messages.appendChild(suggestionsContainer);
-        this.scrollToBottom();
-    }
-
-    /**
-     * Clear conversation
-     */
-    clearConversation() {
-        if (this.elements.messages) {
-            this.elements.messages.innerHTML = '';
-            this.conversationHistory = [];
-        }
-    }
-
-    /**
-     * Get conversation history
-     */
-    getHistory() {
-        return this.conversationHistory;
-    }
-
-    /**
-     * Export conversation
-     */
-    exportConversation() {
-        return JSON.stringify(this.conversationHistory, null, 2);
+        console.log(`Track: ${category} | ${action} | ${label}`);
     }
 }
 
-// Global helper functions for backward compatibility
-let mozartChatbot = null;
+// Global initialization
+document.addEventListener('DOMContentLoaded', () => {
+    window.mozartChatbot = new MozartChatbot();
+});
 
-function toggleChatbot() {
-    if (mozartChatbot) {
-        mozartChatbot.toggle();
-    } else {
-        console.warn('Mozart Chatbot: Chatbot not initialized yet. Attempting to initialize...');
-        // Try to initialize if not already done
-        if (!mozartChatbot) {
-            mozartChatbot = new MozartChatbot();
-            // Give it a moment to initialize, then try again
-            setTimeout(() => {
-                if (mozartChatbot) {
-                    mozartChatbot.toggle();
-                }
-            }, 100);
-        }
-    }
-}
+function toggleChatbot() { window.mozartChatbot.toggle(); }
+function sendMessage() { window.mozartChatbot.sendMessage(); }
+function handleChatKeyPress(e) { if (e.key === 'Enter') window.mozartChatbot.sendMessage(); }
+function clearChat() { window.mozartChatbot.clearChat(); }
 
-function sendMessage() {
-    if (mozartChatbot) {
-        mozartChatbot.sendMessage();
-    } else {
-        console.warn('Mozart Chatbot: Chatbot not initialized yet.');
-    }
-}
-
-function handleChatKeyPress(event) {
-    if (event.key === 'Enter' && mozartChatbot) {
-        mozartChatbot.sendMessage();
-    }
-}
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('📄 DOM loaded, initializing chatbot...');
-        mozartChatbot = new MozartChatbot();
-        window.mozartChatbot = mozartChatbot;
-    });
-} else {
-    console.log('📄 DOM already loaded, initializing chatbot immediately...');
-    mozartChatbot = new MozartChatbot();
-    window.mozartChatbot = mozartChatbot;
-}
-
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MozartChatbot;
-}
-
-// Export class and functions to window immediately
-if (typeof window !== 'undefined') {
-    window.MozartChatbot = MozartChatbot;
-    window.toggleChatbot = toggleChatbot;
-    window.sendMessage = sendMessage;
-    window.handleChatKeyPress = handleChatKeyPress;
-
-    console.log('🌐 Mozart Chatbot functions exported to window object');
-}
