@@ -350,46 +350,6 @@ body {
     transform: translateY(-3px);
 }
 
-.hero-scroll {
-    position: absolute;
-    bottom: 3rem;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    z-index: 10;
-}
-
-@media (max-height: 700px) {
-    .hero-scroll {
-        display: none;
-    }
-}
-
-.scroll-indicator {
-    width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, var(--color-primary), transparent);
-    margin: 1rem auto 0;
-    animation: scroll-bounce 2s ease infinite;
-}
-
-@keyframes scroll-bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    50% {
-        transform: translateY(10px);
-        opacity: 0.5;
-    }
-}
 
 /* Section Styles */
 section {
@@ -977,7 +937,7 @@ section {
 
 .chatbot-container {
     position: fixed;
-    bottom: 2rem;
+    bottom: 7rem;
     right: 2rem;
     width: 400px;
     height: 600px;
