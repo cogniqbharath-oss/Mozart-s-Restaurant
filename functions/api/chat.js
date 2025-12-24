@@ -37,7 +37,7 @@ export async function onRequest(context) {
         }
 
         // Get API key from environment or use default
-        const apiKey = env.GEMINI_API_KEY || "AIzaSyCTgPLJ1WqlnO02lqwfMUamHZlpD6CT3vg";
+        const apiKey = env.GEMINI_API_KEY || "AIzaSyDW7cMPZMJH-TfyqlZxqJYeui0vinuw1v8";
 
         if (!apiKey) {
             throw new Error("API Key not configured");
