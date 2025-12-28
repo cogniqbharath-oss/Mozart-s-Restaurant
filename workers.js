@@ -205,6 +205,8 @@ class MozartChatbot {
                 // Detection logic
                 this.detectVisualRequests(message, data.response);
                 this.detectLeadCaptureOpportunity(message, data.response);
+            } else {
+                this.addMessage(data.message || "I'm having a bit of trouble processing that. Could you try again or call us at (509) 548-0600?", 'bot', 'error');
             }
         } catch (error) {
             console.error('Chat error:', error);

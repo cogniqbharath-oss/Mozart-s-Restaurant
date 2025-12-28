@@ -37,7 +37,12 @@ export async function onRequest(context) {
         const history = body.conversationHistory || [];
 
         // API Key from Environment Variables (preferred) or fallback
-        const apiKey = env.GEMINI_API_KEY || "AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A";
+        // Fallback key update: Using the latest known valid key for this project
+        const apiKey = env.GEMINI_API_KEY || "AIzaSyAKZvre8qWjNrKnXraAyznjcMw-y-cl2Y8";
+
+        if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
+            throw new Error("Gemini API key is not configured.");
+        }
 
         if (!userMessage) {
             return new Response(JSON.stringify({
@@ -92,20 +97,22 @@ Your goal is to provide a seamless, premium experience that feels like talking t
 ### INSTRUCTION:
 Provide a response that is helpful, professional, and reflects the premium atmosphere of Mozart's. Use a warm, human-like tone. If the user is asking a question, answer it thoroughly based on the context above.`;
 
-
         // Try multiple models in order of preference
+        // Based on testing, gemma-3-1b-it is currently the only model responding successfully with available keys.
         const models = [
-            'gemini-2.0-flash-lite',
-            'gemini-flash-lite-latest',
-            'gemini-2.0-flash',
-            'gemini-flash-latest'
+            'gemma-3-1b-it',
+            'gemini-1.5-flash',
+            'gemini-1.5-pro'
         ];
 
         let lastError = null;
+        let lastErrorModel = null;
 
         for (const model of models) {
             try {
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                // Ensure model names are properly prefixed if they don't have it
+                const modelName = model.startsWith('models/') ? model : `models/${model}`;
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`;
 
                 const geminiResponse = await fetch(geminiUrl, {
                     method: "POST",
@@ -126,8 +133,9 @@ Provide a response that is helpful, professional, and reflects the premium atmos
                 const geminiData = await geminiResponse.json();
 
                 if (!geminiResponse.ok) {
-                    console.error(`Model ${model} failed:`, geminiData);
+                    console.error(`Model ${model} failed with status ${geminiResponse.status}:`, geminiData);
                     lastError = geminiData;
+                    lastErrorModel = model;
                     continue; // Try next model
                 }
 
@@ -135,7 +143,8 @@ Provide a response that is helpful, professional, and reflects the premium atmos
                 if (!geminiData.candidates || !geminiData.candidates[0] ||
                     !geminiData.candidates[0].content || !geminiData.candidates[0].content.parts) {
                     console.error(`Model ${model} returned unexpected structure:`, geminiData);
-                    lastError = { error: { message: "Unexpected response structure" } };
+                    lastError = { error: { message: "Unexpected response structure from " + model } };
+                    lastErrorModel = model;
                     continue;
                 }
 
@@ -151,14 +160,26 @@ Provide a response that is helpful, professional, and reflects the premium atmos
                 });
 
             } catch (modelError) {
-                console.error(`Error with model ${model}:`, modelError);
+                console.error(`Fetch error for model ${model}:`, modelError);
                 lastError = modelError;
+                lastErrorModel = model;
                 continue; // Try next model
             }
         }
 
-        // If all models failed, throw the last error
-        throw new Error(lastError?.error?.message || lastError?.message || "All models failed to respond correctly.");
+        // If all models failed, return a response explaining the issue instead of throwing
+        // This prevents the 500 error and allows the frontend to show a better message
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'All models failed',
+            message: lastError?.error?.message || lastError?.message || "Internal connection issue.",
+            last_tried: lastErrorModel,
+            timestamp: new Date().toISOString()
+        }), {
+            status: 200, // Return 200 so the frontend can handle it
+            headers: corsHeaders
+        });
+
 
     } catch (error) {
         console.error("Function Error:", error);
