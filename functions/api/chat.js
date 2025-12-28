@@ -1,66 +1,52 @@
+/* ---------------------------
+   MOZART'S RESTAURANT AI CHATBOT BACKEND
+   Cloudflare Pages Function for /api/chat
+---------------------------- */
+
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // Add CORS headers
+    // CORS Headers
     const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Content-Type': 'application/json'
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
     };
 
-    // Handle OPTIONS request for CORS
-    if (request.method === 'OPTIONS') {
+    // Handle Preflight OPTIONS
+    if (request.method === "OPTIONS") {
         return new Response(null, { headers: corsHeaders });
     }
 
+    // Only allow POST requests
     if (request.method !== "POST") {
-        return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+        return new Response(JSON.stringify({
+            success: false,
+            error: "Method not allowed"
+        }), {
             status: 405,
             headers: corsHeaders
         });
     }
 
     try {
-        const data = await request.json();
-        const userMessage = data.message || "";
+        // Parse request body
+        const body = await request.json();
+        const userMessage = body.message;
+        const customerContext = body.context || {};
+        const history = body.conversationHistory || [];
 
-        // Ping check for debugging
-        if (userMessage.toLowerCase() === 'ping') {
+        // API Key from Environment Variables (preferred) or fallback
+        const apiKey = env.GEMINI_API_KEY || "AIzaSyAVVDMr6_-jsFx7m6XrkJit27Lq7JxsH6A";
+
+        if (!userMessage) {
             return new Response(JSON.stringify({
-                success: true,
-                response: "Pong! API is working. 🏓",
-                timestamp: new Date().toISOString()
+                success: false,
+                error: "No message provided"
             }), {
+                status: 400,
                 headers: corsHeaders
             });
-        }
-
-        // Get API key from environment or use default
-        const apiKey = env.GEMINI_API_KEY || "AIzaSyDW7cMPZMJH-TfyqlZxqJYeui0vinuw1v8";
-
-        if (!apiKey) {
-            throw new Error("API Key not configured");
-        }
-
-        // Context generation
-        const now = new Date();
-        const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-        const currentHour = now.getHours();
-        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-
-        let currentInfo = `Current day: ${dayName}, Current time: ${timeString}\n`;
-
-        // Add live music notification if Friday evening
-        if (dayName === "Friday" && currentHour >= 19 && currentHour < 22) {
-            currentInfo += "SPECIAL: Live music is currently playing! 🎵\n";
-        } else if (dayName === "Friday") {
-            currentInfo += "REMINDER: Live music tonight from 7:00 PM - 10:00 PM!\n";
-        }
-
-        // Peak hours warning
-        if (currentHour >= 18 && currentHour <= 21) {
-            currentInfo += "NOTE: Currently peak dining hours - service may be slower. Reservations recommended.\n";
         }
 
         const RESTAURANT_CONTEXT = `
@@ -110,22 +96,23 @@ IMPORTANT: Always be helpful, professional, and convey the premium nature of Moz
 When helping with reservations, collect all necessary details and inform them you'll have the restaurant confirm via phone or email.
 `;
 
-        const prompt = `${RESTAURANT_CONTEXT}
+        // Format conversation history for prompt
+        let historyText = "";
+        if (history.length > 0) {
+            historyText = "\n\nRECENT CONVERSATION:\n" + history.map(h => `User: ${h.user}\nBot: ${h.bot}`).join("\n");
+        }
 
-${currentInfo}
+        const prompt = `${RESTAURANT_CONTEXT}${historyText}
 
 CUSTOMER QUESTION/REQUEST:
 ${userMessage}
 
-Provide a helpful, professional response that addresses their needs while maintaining the upscale, European fine dining atmosphere of Mozart's Restaurant. Be warm and engaging.
-`;
+Provide a helpful, professional response that addresses their needs while maintaining the upscale, European fine dining atmosphere of Mozart's Restaurant. Be warm and engaging.`;
 
         // Try multiple models in order of preference
-        // Using models that are confirmed to work with this API
         const models = [
             'gemini-2.0-flash-lite',
             'gemini-flash-lite-latest',
-            'gemini-2.5-flash-lite',
             'gemini-2.0-flash',
             'gemini-flash-latest'
         ];
@@ -134,8 +121,6 @@ Provide a helpful, professional response that addresses their needs while mainta
 
         for (const model of models) {
             try {
-                console.log(`Trying model: ${model}`);
-
                 const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
                 const geminiResponse = await fetch(geminiUrl, {
@@ -189,22 +174,17 @@ Provide a helpful, professional response that addresses their needs while mainta
         }
 
         // If all models failed, throw the last error
-        throw new Error(lastError?.error?.message || lastError?.message || "All models failed");
+        throw new Error(lastError?.error?.message || lastError?.message || "All models failed to respond correctly.");
 
     } catch (error) {
         console.error("Function Error:", error);
 
-        // Provide detailed error information
-        const errorResponse = {
+        return new Response(JSON.stringify({
             success: false,
             error: 'Internal server error',
             message: error.message || 'Unknown error occurred',
-            details: error.stack || 'No stack trace available',
-            timestamp: new Date().toISOString(),
-            suggestion: 'Please check your API key and try again. If the issue persists, contact support.'
-        };
-
-        return new Response(JSON.stringify(errorResponse), {
+            timestamp: new Date().toISOString()
+        }), {
             status: 500,
             headers: corsHeaders
         });

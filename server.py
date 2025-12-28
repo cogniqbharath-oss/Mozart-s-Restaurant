@@ -19,7 +19,7 @@ CORS(app)  # Enable CORS for frontend communication
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if not GEMINI_API_KEY:
     # Fallback to hardcoded key only if .env is missing (NOT RECOMMENDED)
-    GEMINI_API_KEY = 'AIzaSyCTgPLJ1WqlnO02lqwfMUamHZlpD6CT3vg'
+    GEMINI_API_KEY = 'AIzaSyDW7cMPZMJH-TfyqlZxqJYeui0vinuw1v8'
 
 genai.configure(api_key=GEMINI_API_KEY)
 
