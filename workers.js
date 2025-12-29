@@ -133,36 +133,36 @@ class MozartChatbot {
 
     sendInitialGreeting() {
         const hour = new Date().getHours();
-        let greeting = "Welcome to Mozart's Restaurant! 🎵";
+        let welcomeMessage = "";
 
         if (hour < 12) {
-            greeting = "Good morning! Looking for a perfect breakfast or brunch to start your day? ☕ Mozart's AI Concierge is here to help!";
+            welcomeMessage = "Good morning! It's a beautiful day in Leavenworth. How may I assist you with your breakfast or brunch plans at Mozart's today?";
         } else if (hour < 17) {
-            greeting = "Good afternoon! Time for lunch or a quick coffee break? 🍰 How can I assist you at Mozart's today?";
+            welcomeMessage = "Good afternoon! Welcome to Mozart's. Are you looking for a delightful lunch or perhaps interested in our renowned wine collection?";
         } else {
-            greeting = "Good evening! Ready for a romantic fine dining experience? 🍷 Let me help you with your evening plans at Mozart's.";
+            welcomeMessage = "Good evening. It's a pleasure to welcome you to Mozart's. How may I help you prepare for a memorable evening of fine dining and music?";
         }
 
-        this.addMessage(greeting, 'bot');
-        this.addMessage("I'm powered by Gemini 1.5 Flash and can help with reservations, our menu, or even show you photos of our specialties!", 'bot');
+        setTimeout(() => {
+            this.addMessage(welcomeMessage, 'bot');
+        }, 500);
     }
 
     loadSuggestions() {
         if (!this.elements.suggestions) return;
 
         const suggestions = [
-            { text: '📖 View Menu', query: 'Show me the menu' },
-            { text: '⏰ Opening Hours', query: 'What are your hours?' },
-            { text: '📍 Location', query: 'Where are you located?' },
-            { text: '🥘 Today\'s Specials', query: 'What are today\'s specials?' },
-            { text: '📸 Show Food', query: 'Show me some food images' }
+            { text: '🍷 Our Menu', query: 'Could you show me your menu selections?' },
+            { text: '🎵 Live Music', query: 'Tell me about your live music on Fridays.' },
+            { text: '🚗 Location & Hours', query: 'Where are you located and what are your hours?' },
+            { text: '📅 Reservations', query: 'I would like to make a reservation.' }
         ];
 
         this.elements.suggestions.innerHTML = '';
         suggestions.forEach(item => {
             const chip = document.createElement('div');
             chip.className = 'suggestion-chip';
-            chip.textContent = item.text;
+            chip.innerHTML = item.text;
             chip.onclick = () => this.sendMessage(item.query);
             this.elements.suggestions.appendChild(chip);
         });
@@ -234,15 +234,9 @@ class MozartChatbot {
     }
 
     detectLeadCaptureOpportunity(message, response) {
-        const bookingKeywords = ['reserve', 'book', 'reservation', 'table', 'event', 'party', 'catering'];
-        const matches = bookingKeywords.some(kw => message.toLowerCase().includes(kw));
-
-        if (matches && this.leadCaptureState === 'none' && this.conversationHistory.length > 2) {
-            setTimeout(() => {
-                this.leadCaptureState = 'asking_name';
-                this.addMessage("By the way, I can pass your interest to our manager. What is your name?", 'bot');
-            }, 2000);
-        }
+        // Disabled to allow the AI to handle conversation flow naturally in the backend
+        // This prevents repetitive "By the way" interruptions
+        return;
     }
 
     detectVisualRequests(message, response) {

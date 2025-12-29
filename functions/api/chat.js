@@ -33,11 +33,9 @@ export async function onRequest(context) {
         // Parse request body
         const body = await request.json();
         const userMessage = body.message;
-        const customerContext = body.context || {};
         const history = body.conversationHistory || [];
 
-        // API Key from Environment Variables (preferred) or fallback
-        // Fallback key update: Using the latest known valid key for this project
+        // API Key from Environment Variables
         const apiKey = env.GEMINI_API_KEY || "AIzaSyAKZvre8qWjNrKnXraAyznjcMw-y-cl2Y8";
 
         if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
@@ -54,55 +52,54 @@ export async function onRequest(context) {
             });
         }
 
+        // Restaurant context defining the personality and facts
         const RESTAURANT_CONTEXT = `
-You are the "Mozart's AI Concierge," a sophisticated, warm, and highly professional assistant for Mozart's Restaurant in Leavenworth, WA. 
+You are the "Mozart's AI Concierge," a professional, warm, and sophisticated host for Mozart's Restaurant in Leavenworth, WA. 
 
-Your goal is to provide a seamless, premium experience that feels like talking to a knowledgeable host at a world-class restaurant.
+Identity:
+- Woman-owned legacy since 1980.
+- Modern European/Austrian and Pacific Northwest fusion.
+- Location: 829 Front St, Upstairs, Leavenworth, WA (Lovely valley view!).
 
-### RESTAURANT PERSONALITY:
-- **Tone**: Elegant, inviting, helpful, and charming.
-- **Style**: Use warm greetings (e.g., "Good evening," "It's a pleasure to assist you"). Avoid robotic or overly concise answers. Speak with the grace of a fine dining establishment.
-- **Identity**: Mozart's is a woman-owned legacy (since 1980) combining European/Austrian traditions with Pacific Northwest innovation.
+Key Information:
+- Signature Dishes: Authentic Wiener Schnitzel ($38), PNW Salmon ($42).
+- Wine: 200+ selections from 15+ countries in a temperature-controlled cellar.
+- Events: Live music every Friday (7:00 PM - 10:00 PM) - very romantic.
+- Dietary: Excellent Gluten-Free and Vegetarian options available.
+- Price Range: $50-$100 per person.
 
-### CORE KNOWLEDGE:
-- **Location**: 829 Front St, Upstairs, Leavenworth, WA 98826. (Note: We are upstairs, offering a lovely view!)
-- **Cuisine**: Modern European/Austrian and Pacific Northwest fusion. We are known for our authentic Wiener Schnitzel ($38) and PNW Salmon ($42).
-- **Wine**: We have an extensive, temperature-controlled cellar with 200+ selections from over 15 countries.
-- **Live Music**: Every Friday night from 7:00 PM to 10:00 PM—it's very romantic!
-- **Dietary**: We take pride in offering excellent Gluten-Free and Vegetarian options.
+Response Guidelines:
+1. BE HUMAN: Answer naturally. Don't include tone markers like "(Warm tone)". Just speak warmly.
+2. BE RELEVANT: If the user asks a specific question (e.g., about the menu), answer it directly first. 
+3. DON'T REPEAT: Avoid giving the full welcome speech every time. If it's a follow-up question, be more concise.
+4. RESERVATIONS: We take reservations via phone at +1 (509) 548-0600 or email at host@mozartsrestaurant.com. 
+5. LEAD CAPTURE: ONLY if the user is clearly asking to book or reserve, ask for their name and party size to "note it down for the host," then provide the contact info.
+6. FALLBACK: If you don't know something, offer to have a human host help them.
 
-### POLICIES (HOW TO HANDLE REQUESTS):
-1. **Reservations**: Our online system is currently being optimized. The best way to secure a table is to call us at +1 (509) 548-0600 or email host@mozartsrestaurant.com.
-2. **Dining Style**: We offer a high-value dining experience ($50-$100 per person). We recommend booking in advance, especially for Friday music nights.
-3. **Groups**: For groups larger than 6, please have them contact us directly to ensure we can accommodate them perfectly.
-4. **Human Touch**: If you cannot answer a specific question, say something like: "That's a wonderful question. I want to ensure I give you the most accurate details, so I'll have our host team look into that for you. Would you like our number to call them directly?"
-
-### GUIDELINES FOR RESPONDING:
-- **Be Conversational**: Don't just list facts. Weave them into a friendly response. (e.g., instead of "We have music on Fridays," say "You'll be delighted to know we have live music every Friday evening to perfectly complement your dining experience.")
-- **Stay On Brand**: You ONLY discuss Mozart's Restaurant.
-- **Lead Capture**: If a user is interested in a reservation, ask for their name and party size before directing them to the phone/email, so they feel looked after.
+Conversation Style:
+- Use phrases like "Certainly," "It would be my pleasure," "I'd highly recommend."
+- Reflect the premium, romantic, and historic atmosphere of Mozart's.
+- Keep responses relatively brief but helpful (under 150 words).
 `;
 
         // Format conversation history for prompt
-        let historyText = "";
+        let historyParts = [];
         if (history.length > 0) {
-            historyText = "\n\n### RECENT CONVERSATION CONTEXT:\n" + history.map(h => `Customer: ${h.user}\nConcierge: ${h.bot}`).join("\n");
+            history.forEach(h => {
+                historyParts.push({ role: "user", parts: [{ text: h.user }] });
+                historyParts.push({ role: "model", parts: [{ text: h.bot }] });
+            });
         }
 
-        const prompt = `${RESTAURANT_CONTEXT}${historyText}
+        // Add the new message
+        historyParts.push({ role: "user", parts: [{ text: userMessage }] });
 
-### NEW CUSTOMER MESSAGE:
-"${userMessage}"
-
-### INSTRUCTION:
-Provide a response that is helpful, professional, and reflects the premium atmosphere of Mozart's. Use a warm, human-like tone. If the user is asking a question, answer it thoroughly based on the context above.`;
-
-        // Try multiple models in order of preference
-        // Based on testing, gemma-3-1b-it is currently the only model responding successfully with available keys.
+        // Update the model list to include 2.0 Flash (Experimental but very fast/reliable)
         const models = [
-            'gemma-3-1b-it',
+            'gemini-2.0-flash-exp',
             'gemini-1.5-flash',
-            'gemini-1.5-pro'
+            'gemini-1.5-pro',
+            'gemma-3-1b-it'
         ];
 
         let lastError = null;
@@ -110,88 +107,75 @@ Provide a response that is helpful, professional, and reflects the premium atmos
 
         for (const model of models) {
             try {
-                // Ensure model names are properly prefixed if they don't have it
                 const modelName = model.startsWith('models/') ? model : `models/${model}`;
                 const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`;
 
-                const geminiResponse = await fetch(geminiUrl, {
+                const response = await fetch(geminiUrl, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: prompt }]
-                        }],
+                        contents: historyParts,
+                        systemInstruction: {
+                            parts: [{ text: RESTAURANT_CONTEXT }]
+                        },
                         generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 1024,
+                            temperature: 0.75,
+                            maxOutputTokens: 800,
+                            topP: 0.95,
                         }
                     })
                 });
 
-                const geminiData = await geminiResponse.json();
+                const data = await response.json();
 
-                if (!geminiResponse.ok) {
-                    console.error(`Model ${model} failed with status ${geminiResponse.status}:`, geminiData);
-                    lastError = geminiData;
-                    lastErrorModel = model;
-                    continue; // Try next model
-                }
-
-                // Check if response has the expected structure
-                if (!geminiData.candidates || !geminiData.candidates[0] ||
-                    !geminiData.candidates[0].content || !geminiData.candidates[0].content.parts) {
-                    console.error(`Model ${model} returned unexpected structure:`, geminiData);
-                    lastError = { error: { message: "Unexpected response structure from " + model } };
+                if (!response.ok) {
+                    console.error(`Model ${model} failed:`, data);
+                    lastError = data;
                     lastErrorModel = model;
                     continue;
                 }
 
-                const aiResponse = geminiData.candidates[0].content.parts[0].text;
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
+                    const aiResponse = data.candidates[0].content.parts[0].text;
 
-                return new Response(JSON.stringify({
-                    success: true,
-                    response: aiResponse,
-                    model: model,
-                    timestamp: new Date().toISOString()
-                }), {
-                    headers: corsHeaders
-                });
+                    return new Response(JSON.stringify({
+                        success: true,
+                        response: aiResponse,
+                        model: model,
+                        timestamp: new Date().toISOString()
+                    }), { headers: corsHeaders });
+                }
 
-            } catch (modelError) {
-                console.error(`Fetch error for model ${model}:`, modelError);
-                lastError = modelError;
+                lastError = { message: "Invalid response structure" };
                 lastErrorModel = model;
-                continue; // Try next model
+            } catch (err) {
+                console.error(`Fetch error for ${model}:`, err);
+                lastError = err;
+                lastErrorModel = model;
             }
         }
 
-        // If all models failed, return a response explaining the issue instead of throwing
-        // This prevents the 500 error and allows the frontend to show a better message
+        // Final fallback if all models fail
         return new Response(JSON.stringify({
             success: false,
-            error: 'All models failed',
-            message: lastError?.error?.message || lastError?.message || "Internal connection issue.",
-            last_tried: lastErrorModel,
-            timestamp: new Date().toISOString()
+            error: 'AI connection issue',
+            message: lastError?.error?.message || lastError?.message || "Our AI concierge is currently attending to other guests. Please call us at (509) 548-0600.",
+            last_tried: lastErrorModel
         }), {
-            status: 200, // Return 200 so the frontend can handle it
+            status: 200,
             headers: corsHeaders
         });
 
-
     } catch (error) {
-        console.error("Function Error:", error);
-
+        console.error("General Error:", error);
         return new Response(JSON.stringify({
             success: false,
-            error: 'Internal server error',
-            message: error.message || 'Unknown error occurred',
-            timestamp: new Date().toISOString()
+            error: 'Server error',
+            message: error.message
         }), {
             status: 500,
             headers: corsHeaders
         });
     }
 }
+
