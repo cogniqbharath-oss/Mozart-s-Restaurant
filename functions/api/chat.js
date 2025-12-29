@@ -110,25 +110,69 @@ Conversation Style:
                 const modelName = model.startsWith('models/') ? model : `models/${model}`;
                 const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`;
 
+                // Check if this model likely supports systemInstruction
+                const useSystemInstruction = !model.includes('gemma');
+
+                let requestBody = {
+                    contents: historyParts,
+                    generationConfig: {
+                        temperature: 0.75,
+                        maxOutputTokens: 800,
+                        topP: 0.95,
+                    }
+                };
+
+                if (useSystemInstruction) {
+                    requestBody.systemInstruction = {
+                        parts: [{ text: RESTAURANT_CONTEXT }]
+                    };
+                } else {
+                    // Fallback for models like Gemma: Prepend context to the first message
+                    if (requestBody.contents.length > 0 && requestBody.contents[0].parts.length > 0) {
+                        const originalText = requestBody.contents[0].parts[0].text;
+                        requestBody.contents[0].parts[0].text = `CONTEXT:\n${RESTAURANT_CONTEXT}\n\nUSER MESSAGE:\n${originalText}`;
+                    }
+                }
+
                 const response = await fetch(geminiUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: historyParts,
-                        systemInstruction: {
-                            parts: [{ text: RESTAURANT_CONTEXT }]
-                        },
-                        generationConfig: {
-                            temperature: 0.75,
-                            maxOutputTokens: 800,
-                            topP: 0.95,
-                        }
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
+                    // If we tried systemInstruction and it failed specifically because it's not enabled, retry this model once without it
+                    if (useSystemInstruction && data.error && data.error.message && data.error.message.includes("Developer instruction")) {
+                        console.log(`Retrying ${model} without systemInstruction...`);
+
+                        // Modify history for retry
+                        const retryContents = JSON.parse(JSON.stringify(historyParts));
+                        if (retryContents.length > 0 && retryContents[0].parts.length > 0) {
+                            retryContents[0].parts[0].text = `CONTEXT:\n${RESTAURANT_CONTEXT}\n\nUSER MESSAGE:\n${retryContents[0].parts[0].text}`;
+                        }
+
+                        const retryResponse = await fetch(geminiUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                contents: retryContents,
+                                generationConfig: requestBody.generationConfig
+                            })
+                        });
+                        const retryData = await retryResponse.json();
+
+                        if (retryResponse.ok && retryData.candidates?.[0]?.content?.parts?.[0]?.text) {
+                            return new Response(JSON.stringify({
+                                success: true,
+                                response: retryData.candidates[0].content.parts[0].text,
+                                model: model,
+                                timestamp: new Date().toISOString()
+                            }), { headers: corsHeaders });
+                        }
+                    }
+
                     console.error(`Model ${model} failed:`, data);
                     lastError = data;
                     lastErrorModel = model;
@@ -156,10 +200,18 @@ Conversation Style:
         }
 
         // Final fallback if all models fail
+        let friendlyMessage = "Our AI concierge is currently attending to other guests to ensure their experience is perfect. Please feel free to call us directly at +1 (509) 548-0600 for immediate assistance.";
+
+        // If the error is a quota error, keep the friendly message but log the truth
+        if (lastError?.error?.message?.includes("quota") || lastError?.message?.includes("quota")) {
+            console.warn("Quota exceeded for all models.");
+        }
+
         return new Response(JSON.stringify({
             success: false,
             error: 'AI connection issue',
-            message: lastError?.error?.message || lastError?.message || "Our AI concierge is currently attending to other guests. Please call us at (509) 548-0600.",
+            message: friendlyMessage,
+            details: lastError?.error?.message || lastError?.message, // Keep technical details in a different field for debugging
             last_tried: lastErrorModel
         }), {
             status: 200,
